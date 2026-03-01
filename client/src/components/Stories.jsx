@@ -44,7 +44,7 @@ const Stories = () => {
             <div className="space-y-2">
               <span className="text-primary text-xs font-bold uppercase">{story.category}</span>
               <h3 className="font-display text-2xl font-bold leading-tight group-hover:text-primary transition-colors">{story.title}</h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm line-clamp-3">{story.description}</p>
+              <p className="text-slate-600 text-sm line-clamp-3">{story.description}</p>
               <div className="flex items-center gap-4 pt-2 text-xs text-slate-500 font-medium">
                 <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">schedule</span> {story.readTime}</span>
                 <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">source</span> {story.sources}</span>

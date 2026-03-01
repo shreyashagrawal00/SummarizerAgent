@@ -10,7 +10,7 @@ const Features = () => {
           <div className="w-12 h-12 rounded-full overflow-hidden mb-3">
             <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoNtsvgrel1fjcVFtNT9Y_zMhpGPhpUYv0iSG61xn57q7X8yMsGXVP03zAkjELVICDQzOAaELg0cja6-MPDYPXOqqRnOJ6NwmKubZ7loXVGzKsBEkOAGkAnMlK_rVTTMtJf9udP1MwREObWjvrhN-hMazkeNalo8IhvxTKfezYd_ZU-MEzPb8RynOLIF-xuPDBxxghFbW3UVNxL3WxSD17f4sEC0bMe4Tey23G4NwNXSkVvQcfdrhaVyPxlxmgsiQ1Nl21n5zswVk" alt="Julian Vance" />
           </div>
-          <p className="font-bold text-lg">Julian Vance</p>
+          <p className="font-bold text-lg text-white">Julian Vance</p>
           <p className="text-slate-400 text-sm">Chief Content Officer at GlobalNews</p>
         </div>
       </div>

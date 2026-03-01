@@ -1,6 +1,6 @@
 const Footer = () => {
   return (
-    <footer className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 py-16">
+    <footer className="bg-white border-t border-slate-200 py-16">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12">
           <div className="col-span-2">
@@ -44,7 +44,7 @@ const Footer = () => {
             </ul>
           </div>
         </div>
-        <div className="border-t border-slate-100 dark:border-slate-900 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="border-t border-slate-100 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-slate-400">© 2023 Briefly Publishing Group Inc. All rights reserved.</p>
           <p className="text-xs text-slate-400 italic">Designed for clarity, read with intention.</p>
         </div>
