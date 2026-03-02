@@ -17,6 +17,14 @@ const Header = () => {
           <a className="text-sm font-medium hover:text-primary transition-colors" href="#">Archive</a>
           <a className="text-sm font-medium hover:text-primary transition-colors" href="#">Pricing</a>
           <a className="text-sm font-medium hover:text-primary transition-colors" href="#">About</a>
+          {isAuthenticated && (
+            <button
+              onClick={() => navigate("/feed")}
+              className="text-sm font-medium hover:text-primary transition-colors bg-transparent border-none cursor-pointer"
+            >
+              Feed
+            </button>
+          )}
         </nav>
         <div className="flex items-center gap-4">
           {isAuthenticated ? (

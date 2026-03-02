@@ -19,9 +19,16 @@ API.interceptors.response.use(
   (res) => res,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const isAuthRoute = originalRequest.url.includes("/auth/login") || originalRequest.url.includes("/auth/refresh");
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
       originalRequest._retry = true;
       const refreshToken = localStorage.getItem("refreshToken");
+
+      if (!refreshToken) {
+        window.location.href = "/login";
+        return Promise.reject(error);
+      }
 
       try {
         const res = await axios.post(`${API.defaults.baseURL}/auth/refresh`, { refreshToken });

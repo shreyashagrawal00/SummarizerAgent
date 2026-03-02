@@ -22,3 +22,16 @@ export const getNewsSummary = async (req, res) => {
     res.status(500).json({ message: "Failed to generate news summary" });
   }
 };
+
+export const getNews = async (req, res) => {
+  try {
+    const articles = await fetchNews();
+    res.json({
+      totalArticles: articles?.length || 0,
+      articles: articles || []
+    });
+  } catch (error) {
+    console.error("Fetch news error:", error);
+    res.status(500).json({ message: "Failed to fetch news articles" });
+  }
+};
