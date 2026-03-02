@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-const MODELS = ["gemini-2.0-flash", "gemini-2.0-flash-lite"];
+const MODELS = ["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash-8b", "gemini-1.5-pro"];
 
 export const summarizeNews = async (articles) => {
   if (!articles || articles.length === 0) return "No information to summarize.";

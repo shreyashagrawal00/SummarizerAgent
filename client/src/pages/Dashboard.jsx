@@ -6,12 +6,19 @@ import { useNavigate } from "react-router-dom";
 export default function Dashboard() {
   const [summary, setSummary] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState(null);
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (isAuthenticated) {
       setIsLoading(true);
+
+      // Fetch user profile
+      API.get("/auth/me")
+        .then(res => setUser(res.data))
+        .catch(err => console.error("Failed to fetch user profile", err));
+
       API.get("/news/summary")
         .then(res => setSummary(res.data.summary))
         .catch(err => {
@@ -37,14 +44,12 @@ export default function Dashboard() {
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
               <h3 className="font-display text-xl font-bold mb-4">Your Account</h3>
               <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
-                    JD
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-slate-900">John Doe</p>
-                    <p className="text-xs text-slate-500">Premium Member</p>
-                  </div>
+                <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
+                  {user?.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U"}
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-900">{user?.name || "User"}</p>
+                  <p className="text-xs text-slate-500">{user?.email || "Member"}</p>
                 </div>
                 <button
                   onClick={logout}

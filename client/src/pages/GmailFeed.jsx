@@ -22,6 +22,10 @@ export default function GmailFeed() {
           console.error("Failed to fetch emails", err);
           if (err.response?.status === 403) {
             setConnectError("gmail_not_connected");
+          } else if (err.response?.status === 401) {
+            setConnectError("gmail_token_expired");
+          } else {
+            setConnectError("gmail_fetch_error");
           }
         })
         .finally(() => setIsLoading(false));
@@ -64,16 +68,26 @@ export default function GmailFeed() {
           <p className="text-slate-500 mt-2">Your recent emails, with AI-powered summarization at your fingertips.</p>
         </header>
 
-        {connectError === "gmail_not_connected" ? (
+        {connectError ? (
           <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300">
-            <span className="material-symbols-outlined text-5xl text-slate-300 mb-4">mail_lock</span>
-            <h3 className="text-xl font-bold text-slate-900">Gmail Not Connected</h3>
-            <p className="text-slate-500 mt-2 mb-6">Please sign in with Google to access your emails.</p>
+            <span className="material-symbols-outlined text-5xl text-slate-300 mb-4">
+              {connectError === "gmail_not_connected" ? "mail_lock" : "sync_problem"}
+            </span>
+            <h3 className="text-xl font-bold text-slate-900">
+              {connectError === "gmail_not_connected" ? "Gmail Not Connected" :
+                connectError === "gmail_token_expired" ? "Gmail Session Expired" :
+                  "Failed to Load Emails"}
+            </h3>
+            <p className="text-slate-500 mt-2 mb-6">
+              {connectError === "gmail_not_connected" ? "Please sign in with Google to access your emails." :
+                connectError === "gmail_token_expired" ? "Your Google session has expired. Please sign in again." :
+                  "Something went wrong fetching your emails. Try signing in with Google again."}
+            </p>
             <button
               onClick={() => window.location.href = "http://localhost:5001/api/auth/google"}
               className="bg-primary text-white text-sm font-bold px-8 py-3 rounded-xl hover:brightness-110 transition-all shadow-md"
             >
-              Connect Gmail via Google
+              {connectError === "gmail_not_connected" ? "Connect Gmail via Google" : "Re-connect Google Account"}
             </button>
           </div>
         ) : isLoading ? (
@@ -119,7 +133,7 @@ export default function GmailFeed() {
                       <div className="mt-4 flex items-center gap-3">
                         <button
                           onClick={() => summarizeEmail(email, index)}
-                          disabled={summarizingId !== null}
+                          disabled={summarizingId === index}
                           className="flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-bold px-4 py-2 rounded-lg hover:bg-primary hover:text-white transition-all disabled:opacity-50"
                         >
                           {summarizingId === index ? (

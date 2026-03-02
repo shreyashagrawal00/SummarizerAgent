@@ -48,7 +48,7 @@ export const createAccessToken = (userId) =>
   jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "15m" });
 
 export const createRefreshToken = (userId) =>
-  jwt.sign({ id: userId }, process.env.REFRESH_SECRET || "refresh_secret_key", { expiresIn: "7d" });
+  jwt.sign({ id: userId }, process.env.REFRESH_SECRET, { expiresIn: "7d" });
 
 
 export const refreshAccessToken = async (req, res) => {
@@ -57,7 +57,12 @@ export const refreshAccessToken = async (req, res) => {
   if (!refreshToken)
     return res.status(401).json({ message: "No refresh token" });
 
-  const payload = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+  let payload;
+  try {
+    payload = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid refresh token" });
+  }
 
   const user = await User.findById(payload.id);
   if (!user || user.refreshToken !== refreshToken)

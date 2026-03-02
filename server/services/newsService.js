@@ -1,9 +1,9 @@
 import axios from "axios";
 
-export const fetchNews = async (page = null) => {
+export const fetchNews = async (page = null, country = process.env.DEFAULT_COUNTRY || "in") => {
   try {
     const params = {
-      country: "in",
+      country,
       apikey: process.env.NEWS_API_KEY
     };
     if (page) params.page = page;

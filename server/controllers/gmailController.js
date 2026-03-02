@@ -12,10 +12,15 @@ export const getEmails = async (req, res) => {
       });
     }
 
-    const emails = await fetchGmailEmails(user.googleAccessToken);
+    console.log("Gmail fetch - User:", user.email);
+    console.log("Gmail fetch - Has access token:", !!user.googleAccessToken);
+    console.log("Gmail fetch - Has refresh token:", !!user.googleRefreshToken);
+
+    const emails = await fetchGmailEmails(user.googleAccessToken, user.googleRefreshToken);
     res.json({ totalEmails: emails.length, emails });
   } catch (error) {
-    console.error("Gmail fetch error:", error);
+    console.error("Gmail fetch error:", error.message);
+    console.error("Gmail fetch error details:", JSON.stringify(error.response?.data || error.errors || error, null, 2));
     if (error.code === 401) {
       return res.status(401).json({
         message: "Gmail token expired",
@@ -36,7 +41,7 @@ export const summarizeEmails = async (req, res) => {
       });
     }
 
-    const emails = await fetchGmailEmails(user.googleAccessToken);
+    const emails = await fetchGmailEmails(user.googleAccessToken, user.googleRefreshToken);
     if (!emails || emails.length === 0) {
       return res.json({ totalEmails: 0, summary: "No emails to summarize." });
     }

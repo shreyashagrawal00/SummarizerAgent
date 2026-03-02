@@ -152,7 +152,7 @@ export default function NewsFeed() {
                     </a>
                     <button
                       onClick={() => summarizeArticle(article, index)}
-                      disabled={summarizingId !== null}
+                      disabled={summarizingId === index}
                       className="flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-bold px-4 py-2 rounded-lg hover:bg-primary hover:text-white transition-all disabled:opacity-50"
                     >
                       {summarizingId === index ? (

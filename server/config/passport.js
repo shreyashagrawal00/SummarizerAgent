@@ -8,7 +8,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "http://localhost:5001/api/auth/google/callback",
+        callbackURL: process.env.GOOGLE_CALLBACK_URL || "http://localhost:5001/api/auth/google/callback",
         accessType: "offline",
         prompt: "consent"
       },
@@ -30,8 +30,11 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             }
           }
 
-          // Save Google access token for Gmail API
+          // Save Google tokens for Gmail API
           user.googleAccessToken = accessToken;
+          if (refreshToken) {
+            user.googleRefreshToken = refreshToken;
+          }
           await user.save();
 
           done(null, user);

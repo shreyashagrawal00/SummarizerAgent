@@ -1,8 +1,16 @@
 import { google } from "googleapis";
 
-export const fetchGmailEmails = async (accessToken, maxResults = 10) => {
-  const auth = new google.auth.OAuth2();
-  auth.setCredentials({ access_token: accessToken });
+export const fetchGmailEmails = async (accessToken, googleRefreshToken = null, maxResults = 10) => {
+  const auth = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET
+  );
+
+  const credentials = { access_token: accessToken };
+  if (googleRefreshToken) {
+    credentials.refresh_token = googleRefreshToken;
+  }
+  auth.setCredentials(credentials);
 
   const gmail = google.gmail({ version: "v1", auth });
 

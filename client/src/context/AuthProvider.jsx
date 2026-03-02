@@ -18,10 +18,11 @@ export const AuthProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    // Clean up the URL if needed
+    // Clean up the URL securely
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("token")) {
-      window.history.replaceState({}, document.title, window.location.pathname);
+    if (urlParams.get("token") || urlParams.get("refreshToken")) {
+      const newUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState({}, document.title, newUrl);
     }
   }, []);
 
