@@ -3,7 +3,8 @@ import { summarizeNews } from "../services/summarizerService.js";
 
 export const getNewsSummary = async (req, res) => {
   try {
-    const articles = await fetchNews();
+    const data = await fetchNews();
+    const articles = data.results;
 
     if (!articles || articles.length === 0) {
       return res.json({ totalArticles: 0, summary: "No news found currently." });
@@ -30,10 +31,12 @@ export const getNewsSummary = async (req, res) => {
 
 export const getNews = async (req, res) => {
   try {
-    const articles = await fetchNews();
+    const { page } = req.query;
+    const data = await fetchNews(page);
     res.json({
-      totalArticles: articles?.length || 0,
-      articles: articles || []
+      totalArticles: data.totalResults || 0,
+      articles: data.results || [],
+      nextPage: data.nextPage
     });
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch news articles" });

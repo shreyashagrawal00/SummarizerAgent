@@ -9,20 +9,51 @@ export default function NewsFeed() {
   const [summarizingId, setSummarizingId] = useState(null);
   const [activeSummary, setActiveSummary] = useState(null);
   const [error, setError] = useState(null);
+  const [nextPage, setNextPage] = useState(null);
+  const [pageHistory, setPageHistory] = useState([]);
+  const [currentPageToken, setCurrentPageToken] = useState(null);
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
+  const fetchNews = (pageToken = null) => {
+    setIsLoading(true);
+    const url = pageToken ? `/news?page=${pageToken}` : "/news";
+    API.get(url)
+      .then(res => {
+        setArticles(res.data.articles.slice(0, 9));
+        setNextPage(res.data.nextPage);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      })
+      .catch(err => console.error("Failed to fetch news feed", err))
+      .finally(() => setIsLoading(false));
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
-      setIsLoading(true);
-      API.get("/news")
-        .then(res => setArticles(res.data.articles))
-        .catch(err => console.error("Failed to fetch news feed", err))
-        .finally(() => setIsLoading(false));
+      fetchNews();
     } else {
       navigate("/login");
     }
   }, [isAuthenticated, navigate]);
+
+  const handleNextPage = () => {
+    if (nextPage) {
+      setPageHistory(prev => [...prev, currentPageToken]);
+      const nextToken = nextPage;
+      setCurrentPageToken(nextToken);
+      fetchNews(nextToken);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (pageHistory.length > 0) {
+      const newHistory = [...pageHistory];
+      const prevToken = newHistory.pop();
+      setPageHistory(newHistory);
+      setCurrentPageToken(prevToken);
+      fetchNews(prevToken);
+    }
+  };
 
   const summarizeArticle = async (article, index) => {
     setSummarizingId(index);
@@ -48,7 +79,7 @@ export default function NewsFeed() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-slate-50">
+    <div className="min-h-[calc(100vh-64px)] bg-background-light">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <header className="mb-12">
           <h1 className="font-display text-4xl font-bold text-slate-900">Global News Feed</h1>
@@ -141,6 +172,28 @@ export default function NewsFeed() {
             <span className="material-symbols-outlined text-5xl text-slate-300 mb-4">newspaper</span>
             <h3 className="text-xl font-bold text-slate-900">No articles found</h3>
             <p className="text-slate-500 mt-2">Check back in a few minutes for the latest updates.</p>
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {!isLoading && (articles.length > 0 || pageHistory.length > 0) && (
+          <div className="mt-12 flex items-center justify-center gap-4">
+            <button
+              onClick={handlePrevPage}
+              disabled={pageHistory.length === 0}
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+            >
+              <span className="material-symbols-outlined text-lg">chevron_left</span>
+              Previous
+            </button>
+            <button
+              onClick={handleNextPage}
+              disabled={!nextPage}
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+            >
+              Next
+              <span className="material-symbols-outlined text-lg">chevron_right</span>
+            </button>
           </div>
         )}
       </div>
