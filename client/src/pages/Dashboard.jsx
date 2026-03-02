@@ -16,7 +16,7 @@ export default function Dashboard() {
         .then(res => setSummary(res.data.summary))
         .catch(err => {
           console.error("Failed to fetch summary", err);
-          if (err.response?.data?.message === "OpenAI Quota Exceeded") {
+          if (err.response?.data?.message === "AI Quota Exceeded") {
             setSummary("AI_QUOTA_ERROR");
           }
         })

@@ -20,8 +20,8 @@ export const getNewsSummary = async (req, res) => {
     // If it's a quota error, we should ideally tell the user
     if (error.message?.includes("quota") || error.status === 429) {
       return res.status(500).json({
-        message: "OpenAI Quota Exceeded",
-        detail: "Please check your OpenAI billing details."
+        message: "AI Quota Exceeded",
+        detail: "Please check your AI service billing details."
       });
     }
     res.status(500).json({ message: "Failed to generate news summary" });
@@ -51,8 +51,8 @@ export const summarizeOne = async (req, res) => {
     console.error("Single article summary error:", error);
     if (error.message?.includes("quota") || error.status === 429) {
       return res.status(500).json({
-        message: "OpenAI Quota Exceeded",
-        detail: "Please check your OpenAI billing details."
+        message: "AI Quota Exceeded",
+        detail: "Please check your AI service billing details."
       });
     }
     res.status(500).json({ message: "Failed to summarize article" });

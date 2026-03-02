@@ -35,7 +35,7 @@ export default function NewsFeed() {
       });
     } catch (err) {
       console.error("Failed to summarize article", err);
-      if (err.response?.data?.message === "OpenAI Quota Exceeded") {
+      if (err.response?.data?.message === "AI Quota Exceeded") {
         setError("QUOTA_ERROR");
       } else {
         setError("Summarization failed. Please try again later.");

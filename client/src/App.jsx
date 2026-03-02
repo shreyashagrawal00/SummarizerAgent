@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import NewsFeed from './pages/NewsFeed'
+import GmailFeed from './pages/GmailFeed'
 import Dashboard from './pages/Dashboard'
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/feed" element={<NewsFeed />} />
+              <Route path="/gmail" element={<GmailFeed />} />
               <Route path="/dashboard" element={<Dashboard />} />
             </Routes>
           </main>

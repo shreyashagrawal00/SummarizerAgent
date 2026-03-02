@@ -18,12 +18,20 @@ const Header = () => {
           <a className="text-sm font-medium hover:text-primary transition-colors" href="#">Pricing</a>
           <a className="text-sm font-medium hover:text-primary transition-colors" href="#">About</a>
           {isAuthenticated && (
-            <button
-              onClick={() => navigate("/feed")}
-              className="text-sm font-medium hover:text-primary transition-colors bg-transparent border-none cursor-pointer"
-            >
-              Feed
-            </button>
+            <>
+              <button
+                onClick={() => navigate("/feed")}
+                className="text-sm font-medium hover:text-primary transition-colors bg-transparent border-none cursor-pointer"
+              >
+                Feed
+              </button>
+              <button
+                onClick={() => navigate("/gmail")}
+                className="text-sm font-medium hover:text-primary transition-colors bg-transparent border-none cursor-pointer"
+              >
+                Gmail
+              </button>
+            </>
           )}
         </nav>
         <div className="flex items-center gap-4">

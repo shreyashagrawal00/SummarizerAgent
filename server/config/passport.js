@@ -8,22 +8,20 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "http://localhost:5001/api/auth/google/callback"
+        callbackURL: "http://localhost:5001/api/auth/google/callback",
+        accessType: "offline",
+        prompt: "consent"
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
           let user = await User.findOne({ googleId: profile.id });
 
           if (!user) {
-            // Check if user exists with the same email
             user = await User.findOne({ email: profile.emails[0].value });
 
             if (user) {
-              // Link Google ID to existing account
               user.googleId = profile.id;
-              await user.save();
             } else {
-              // Create new user
               user = await User.create({
                 googleId: profile.id,
                 name: profile.displayName,
@@ -31,6 +29,10 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
               });
             }
           }
+
+          // Save Google access token for Gmail API
+          user.googleAccessToken = accessToken;
+          await user.save();
 
           done(null, user);
         } catch (error) {
