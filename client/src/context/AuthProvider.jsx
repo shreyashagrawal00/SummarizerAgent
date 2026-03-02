@@ -4,18 +4,23 @@ import { AuthContext } from "./AuthContextInstance";
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     const hasLocalToken = !!localStorage.getItem("accessToken");
-    const hasUrlToken = !!new URLSearchParams(window.location.search).get("token");
-    return hasLocalToken || hasUrlToken;
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlToken = urlParams.get("token");
+    const urlRefreshToken = urlParams.get("refreshToken");
+
+    if (urlToken) {
+      localStorage.setItem("accessToken", urlToken);
+      if (urlRefreshToken) localStorage.setItem("refreshToken", urlRefreshToken);
+      return true;
+    }
+
+    return hasLocalToken;
   });
 
   useEffect(() => {
-    // Handle token from URL (e.g., after Google Login)
+    // Clean up the URL if needed
     const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get("token");
-    if (token) {
-      localStorage.setItem("accessToken", token);
-      setIsAuthenticated(true);
-      // Clean up the URL
+    if (urlParams.get("token")) {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);

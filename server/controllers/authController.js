@@ -44,10 +44,10 @@ export const loginUser = async (req, res) => {
   res.json({ accessToken, refreshToken });
 };
 
-const createAccessToken = (userId) =>
+export const createAccessToken = (userId) =>
   jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "15m" });
 
-const createRefreshToken = (userId) =>
+export const createRefreshToken = (userId) =>
   jwt.sign({ id: userId }, process.env.REFRESH_SECRET || "refresh_secret_key", { expiresIn: "7d" });
 
 

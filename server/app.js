@@ -4,6 +4,8 @@ import authRoutes from "./routes/authRoutes.js";
 import newsRoutes from "./routes/newsRoutes.js";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import passport from "passport";
+import "./config/passport.js";
 
 const app = express();
 
