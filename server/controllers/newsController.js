@@ -4,14 +4,12 @@ import { summarizeNews } from "../services/summarizerService.js";
 export const getNewsSummary = async (req, res) => {
   try {
     const articles = await fetchNews();
-    console.log(`Fetched ${articles?.length || 0} news articles.`);
 
     if (!articles || articles.length === 0) {
       return res.json({ totalArticles: 0, summary: "No news found currently." });
     }
 
     const summary = await summarizeNews(articles);
-    console.log("Summary generated successfully.");
 
     res.json({
       totalArticles: articles.length,
@@ -19,6 +17,13 @@ export const getNewsSummary = async (req, res) => {
     });
   } catch (error) {
     console.error("News summary error:", error);
+    // If it's a quota error, we should ideally tell the user
+    if (error.message?.includes("quota") || error.status === 429) {
+      return res.status(500).json({
+        message: "OpenAI Quota Exceeded",
+        detail: "Please check your OpenAI billing details."
+      });
+    }
     res.status(500).json({ message: "Failed to generate news summary" });
   }
 };
@@ -31,7 +36,25 @@ export const getNews = async (req, res) => {
       articles: articles || []
     });
   } catch (error) {
-    console.error("Fetch news error:", error);
     res.status(500).json({ message: "Failed to fetch news articles" });
+  }
+};
+
+export const summarizeOne = async (req, res) => {
+  const { article } = req.body;
+  if (!article) return res.status(400).json({ message: "No article provided" });
+
+  try {
+    const summary = await summarizeNews([article]);
+    res.json({ summary });
+  } catch (error) {
+    console.error("Single article summary error:", error);
+    if (error.message?.includes("quota") || error.status === 429) {
+      return res.status(500).json({
+        message: "OpenAI Quota Exceeded",
+        detail: "Please check your OpenAI billing details."
+      });
+    }
+    res.status(500).json({ message: "Failed to summarize article" });
   }
 };

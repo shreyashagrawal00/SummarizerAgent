@@ -12,7 +12,7 @@ export const summarizeNews = async (articles) => {
     .join("\n");
 
   const response = await openai.chat.completions.create({
-    model: "gpt-4",
+    model: "gpt-4o-mini",
     messages: [
       { role: "user", content: `Summarize into 1-2 pages:\n${content}` }
     ]

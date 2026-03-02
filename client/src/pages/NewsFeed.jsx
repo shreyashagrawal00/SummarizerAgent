@@ -6,6 +6,9 @@ import { useNavigate } from "react-router-dom";
 export default function NewsFeed() {
   const [articles, setArticles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [summarizingId, setSummarizingId] = useState(null);
+  const [activeSummary, setActiveSummary] = useState(null);
+  const [error, setError] = useState(null);
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -20,6 +23,27 @@ export default function NewsFeed() {
       navigate("/login");
     }
   }, [isAuthenticated, navigate]);
+
+  const summarizeArticle = async (article, index) => {
+    setSummarizingId(index);
+    setError(null);
+    try {
+      const res = await API.post("/news/summarize-one", { article });
+      setActiveSummary({
+        title: article.title,
+        content: res.data.summary
+      });
+    } catch (err) {
+      console.error("Failed to summarize article", err);
+      if (err.response?.data?.message === "OpenAI Quota Exceeded") {
+        setError("QUOTA_ERROR");
+      } else {
+        setError("Summarization failed. Please try again later.");
+      }
+    } finally {
+      setSummarizingId(null);
+    }
+  };
 
   if (!isAuthenticated) return null;
 
@@ -95,6 +119,18 @@ export default function NewsFeed() {
                       Read Full Article
                       <span className="material-symbols-outlined text-sm">open_in_new</span>
                     </a>
+                    <button
+                      onClick={() => summarizeArticle(article, index)}
+                      disabled={summarizingId !== null}
+                      className="flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-bold px-4 py-2 rounded-lg hover:bg-primary hover:text-white transition-all disabled:opacity-50"
+                    >
+                      {summarizingId === index ? (
+                        <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <span className="material-symbols-outlined text-sm">auto_awesome</span>
+                      )}
+                      Summarize
+                    </button>
                   </div>
                 </div>
               </article>
@@ -108,6 +144,56 @@ export default function NewsFeed() {
           </div>
         )}
       </div>
+
+      {/* Summary Modal */}
+      {(activeSummary || error) && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-primary">auto_stories</span>
+                <h2 className="font-display text-xl font-bold text-slate-900 line-clamp-1">
+                  {error ? "Summarization Error" : activeSummary?.title}
+                </h2>
+              </div>
+              <button
+                onClick={() => { setActiveSummary(null); setError(null); }}
+                className="w-10 h-10 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-400 transition-colors"
+              >
+                <span className="material-symbols-outlined text-xl">close</span>
+              </button>
+            </div>
+            <div className="p-8 md:p-12 max-h-[60vh] overflow-y-auto">
+              {error === "QUOTA_ERROR" ? (
+                <div className="text-center py-6">
+                  <span className="material-symbols-outlined text-5xl text-amber-500 mb-4">warning_amber</span>
+                  <p className="text-slate-900 font-bold text-lg">AI Quota Exceeded</p>
+                  <p className="text-slate-500 mt-2">Your OpenAI API key has exceeded its limit. Please check your billing details to continue using AI summaries.</p>
+                </div>
+              ) : error ? (
+                <div className="text-center py-6">
+                  <span className="material-symbols-outlined text-5xl text-red-400 mb-4">error_outline</span>
+                  <p className="text-slate-900 font-bold text-lg">{error}</p>
+                </div>
+              ) : (
+                <article className="prose prose-slate max-w-none">
+                  <p className="text-slate-700 text-lg leading-relaxed whitespace-pre-wrap">
+                    {activeSummary?.content}
+                  </p>
+                </article>
+              )}
+            </div>
+            <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => { setActiveSummary(null); setError(null); }}
+                className="bg-slate-900 text-white font-bold px-8 py-3 rounded-xl hover:brightness-110 transition-all shadow-md active:scale-95"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

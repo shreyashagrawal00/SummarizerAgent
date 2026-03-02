@@ -14,7 +14,12 @@ export default function Dashboard() {
       setIsLoading(true);
       API.get("/news/summary")
         .then(res => setSummary(res.data.summary))
-        .catch(err => console.error("Failed to fetch summary", err))
+        .catch(err => {
+          console.error("Failed to fetch summary", err);
+          if (err.response?.data?.message === "OpenAI Quota Exceeded") {
+            setSummary("AI_QUOTA_ERROR");
+          }
+        })
         .finally(() => setIsLoading(false));
     } else {
       navigate("/login");
@@ -88,7 +93,21 @@ export default function Dashboard() {
                 ) : (
                   <article className="prose prose-slate max-w-none">
                     <div className="whitespace-pre-wrap font-sans text-lg leading-relaxed text-slate-800">
-                      {summary || "No summary available for today yet. Please check back later."}
+                      {summary === "AI_QUOTA_ERROR" ? (
+                        <div className="text-center py-10 bg-slate-50 rounded-xl border border-slate-200">
+                          <span className="material-symbols-outlined text-4xl text-amber-500 mb-2">warning_amber</span>
+                          <h3 className="text-lg font-bold text-slate-900">AI Summary Temporarily Unavailable</h3>
+                          <p className="text-sm text-slate-600 mt-2 mb-4">You have exceeded your OpenAI API quota. Please check your billing details.</p>
+                          <button
+                            onClick={() => navigate("/feed")}
+                            className="bg-primary text-white text-xs font-bold px-4 py-2 rounded-lg hover:brightness-110 transition-all"
+                          >
+                            Read Raw News Feed Instead
+                          </button>
+                        </div>
+                      ) : (
+                        summary || "No summary available for today yet. Please check back later."
+                      )}
                     </div>
                   </article>
                 )}
