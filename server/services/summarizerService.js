@@ -5,8 +5,10 @@ const openai = new OpenAI({
 });
 
 export const summarizeNews = async (articles) => {
+  if (!articles || articles.length === 0) return "No information to summarize.";
+
   const content = articles
-    .map(a => `${a.title}: ${a.description}`)
+    .map(a => `${a.title}: ${a.description || a.content || ""}`)
     .join("\n");
 
   const response = await openai.chat.completions.create({

@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const fetchNews = async () => {
   const response = await axios.get(
-    `https://newsdata.io/api/1/latest? `,
+    `https://newsdata.io/api/1/latest`,
     {
       params: {
         country: "in",
@@ -12,5 +12,5 @@ export const fetchNews = async () => {
     }
   );
 
-  return response.data.articles;
+  return response.data.results;
 };
