@@ -35,30 +35,21 @@ export const loginUser = async (req, res) => {
   if (!isMatch)
     return res.status(401).json({ message: "Invalid credentials" });
 
-  const token = jwt.sign(
-    { id: user._id },
-    process.env.JWT_SECRET,
-    { expiresIn: "1d" }
-  );
+  const accessToken = createAccessToken(user._id);
+  const refreshToken = createRefreshToken(user._id);
 
-  res.json({ token });
+  user.refreshToken = refreshToken;
+  await user.save();
+
+  res.json({ accessToken, refreshToken });
 };
-
-
 
 const createAccessToken = (userId) =>
   jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "15m" });
 
 const createRefreshToken = (userId) =>
-  jwt.sign({ id: userId }, process.env.REFRESH_SECRET, { expiresIn: "7d" });
+  jwt.sign({ id: userId }, process.env.REFRESH_SECRET || "refresh_secret_key", { expiresIn: "7d" });
 
-const accessToken = createAccessToken(user._id);
-const refreshToken = createRefreshToken(user._id);
-
-user.refreshToken = refreshToken;
-await user.save();
-
-res.json({ accessToken, refreshToken });
 
 export const refreshAccessToken = async (req, res) => {
   const { refreshToken } = req.body;

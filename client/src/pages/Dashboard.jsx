@@ -1,21 +1,31 @@
 import { useEffect, useState } from "react";
 import API from "../api/api";
+import { useAuth } from "../context/useAuth";
 
 export default function Dashboard() {
   const [summary, setSummary] = useState("");
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    API.get("/news/summary")
-      .then(res => setSummary(res.data.summary));
-  }, []);
+    if (isAuthenticated) {
+      API.get("/news/summary")
+        .then(res => setSummary(res.data.summary))
+        .catch(err => console.error("Failed to fetch summary", err));
+    }
+  }, [isAuthenticated]);
 
-  return <pre>{summary}</pre>;
+  if (!isAuthenticated) return <div>Please login to view the dashboard.</div>;
+
+  return (
+    <div>
+      <pre>{summary}</pre>
+      <Logout />
+    </div>
+  );
 }
 
-import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-
-const Logout = () => {
-  const { logout } = useContext(AuthContext);
+export const Logout = () => {
+  const { logout } = useAuth();
   return <button onClick={logout}>Logout</button>;
 };
+

@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const fetchNews = async () => {
   const response = await axios.get(
-    `https://newsapi.org/v2/top-headlines`,
+    `https://newsdata.io/api/1/latest? `,
     {
       params: {
         country: "in",
