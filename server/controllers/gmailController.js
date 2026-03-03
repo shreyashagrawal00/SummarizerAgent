@@ -2,6 +2,25 @@ import User from "../models/User.js";
 import { fetchGmailEmails } from "../services/gmailService.js";
 import { summarizeNews } from "../services/summarizerService.js";
 
+/**
+ * Helper: fetch emails and persist any refreshed access token.
+ */
+const fetchAndPersistEmails = async (user) => {
+  const { emails, newAccessToken } = await fetchGmailEmails(
+    user.googleAccessToken,
+    user.googleRefreshToken
+  );
+
+  // If the service refreshed the token, save it back to the DB
+  if (newAccessToken && newAccessToken !== user.googleAccessToken) {
+    user.googleAccessToken = newAccessToken;
+    await user.save();
+    console.log("Gmail: saved refreshed access token for", user.email);
+  }
+
+  return emails;
+};
+
 export const getEmails = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -16,12 +35,12 @@ export const getEmails = async (req, res) => {
     console.log("Gmail fetch - Has access token:", !!user.googleAccessToken);
     console.log("Gmail fetch - Has refresh token:", !!user.googleRefreshToken);
 
-    const emails = await fetchGmailEmails(user.googleAccessToken, user.googleRefreshToken);
+    const emails = await fetchAndPersistEmails(user);
     res.json({ totalEmails: emails.length, emails });
   } catch (error) {
     console.error("Gmail fetch error:", error.message);
-    console.error("Gmail fetch error details:", JSON.stringify(error.response?.data || error.errors || error, null, 2));
-    if (error.code === 401) {
+    console.error("Gmail fetch error details:", JSON.stringify(error.response?.data || error.errors || {}, null, 2));
+    if (error.code === 401 || error.response?.status === 401) {
       return res.status(401).json({
         message: "Gmail token expired",
         detail: "Please sign in with Google again to refresh your token.",
@@ -41,12 +60,11 @@ export const summarizeEmails = async (req, res) => {
       });
     }
 
-    const emails = await fetchGmailEmails(user.googleAccessToken, user.googleRefreshToken);
+    const emails = await fetchAndPersistEmails(user);
     if (!emails || emails.length === 0) {
       return res.json({ totalEmails: 0, summary: "No emails to summarize." });
     }
 
-    // Convert emails to article-like format for the summarizer
     const articles = emails.map((e) => ({
       title: e.subject || "(No Subject)",
       description: `From: ${e.from}\n${e.snippet}`,

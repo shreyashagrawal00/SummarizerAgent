@@ -1,20 +1,38 @@
 import { google } from "googleapis";
 
+/**
+ * Fetches Gmail emails for a user.
+ * Returns { emails, newAccessToken? } — newAccessToken is set if the token was refreshed.
+ */
 export const fetchGmailEmails = async (accessToken, googleRefreshToken = null, maxResults = 10) => {
   const auth = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_CALLBACK_URL || "http://localhost:5001/api/auth/google/callback"
   );
 
-  const credentials = { access_token: accessToken };
+  auth.setCredentials({
+    access_token: accessToken,
+    refresh_token: googleRefreshToken || undefined,
+  });
+
+  let newAccessToken = null;
+
+  // Proactively refresh the access token when we have a refresh token,
+  // so we don't fail mid-request when the token is expired.
   if (googleRefreshToken) {
-    credentials.refresh_token = googleRefreshToken;
+    try {
+      const { credentials } = await auth.refreshAccessToken();
+      auth.setCredentials(credentials);
+      newAccessToken = credentials.access_token || null;
+      console.log("Gmail: access token refreshed successfully");
+    } catch (refreshErr) {
+      console.warn("Gmail: could not refresh token, trying existing:", refreshErr.message);
+    }
   }
-  auth.setCredentials(credentials);
 
   const gmail = google.gmail({ version: "v1", auth });
 
-  // Get list of recent messages
   const listResponse = await gmail.users.messages.list({
     userId: "me",
     maxResults,
@@ -22,9 +40,8 @@ export const fetchGmailEmails = async (accessToken, googleRefreshToken = null, m
   });
 
   const messages = listResponse.data.messages || [];
-  if (messages.length === 0) return [];
+  if (messages.length === 0) return { emails: [], newAccessToken };
 
-  // Fetch details for each message
   const emails = await Promise.all(
     messages.map(async (msg) => {
       const detail = await gmail.users.messages.get({
@@ -48,5 +65,5 @@ export const fetchGmailEmails = async (accessToken, googleRefreshToken = null, m
     })
   );
 
-  return emails;
+  return { emails, newAccessToken };
 };
