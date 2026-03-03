@@ -9,14 +9,14 @@ const Stories = () => {
     const fetchTopStories = async () => {
       try {
         const res = await API.get("/news/top-public");
-        const articles = res.data.articles.slice(0, 3).map(article => ({
+        const articles = res.data.articles.map(article => ({
           category: article.category?.[0] || "Global",
           title: article.title,
           description: article.description || article.content || "No description available.",
           readTime: "2 min read",
           sources: article.source_id || "Multiple sources",
           image: article.image_url || "https://images.unsplash.com/photo-1585829365234-78d2b37da65e?q=80&w=2070&auto=format&fit=crop"
-        }));
+        })).slice(0, 3);
         setStories(articles);
       } catch (err) {
         console.error("Failed to fetch top stories", err);

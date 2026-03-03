@@ -34,9 +34,22 @@ export const getNews = async (req, res) => {
   try {
     const { page, category } = req.query;
     const data = await fetchNews(page, category || "top");
+
+    // Filter out duplicate headlines (often happens with syndicated news)
+    const seenTitles = new Set();
+    const uniqueArticles = (data.results || []).filter(article => {
+      if (!article.title) return false;
+      const normalizedTitle = article.title.trim().toLowerCase();
+      if (seenTitles.has(normalizedTitle)) {
+        return false;
+      }
+      seenTitles.add(normalizedTitle);
+      return true;
+    });
+
     res.json({
       totalArticles: data.totalResults || 0,
-      articles: data.results || [],
+      articles: uniqueArticles,
       nextPage: data.nextPage
     });
   } catch (error) {
