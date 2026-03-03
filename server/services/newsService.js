@@ -1,10 +1,15 @@
 import axios from "axios";
 
-export const fetchNews = async (page = null, country = process.env.DEFAULT_COUNTRY || "in") => {
+/**
+ * Fetches news from newsdata.io API
+ * Defaulting to global English news (language=en) and 'top' category for "Real News"
+ */
+export const fetchNews = async (page = null, category = "top", language = "en") => {
   try {
     const params = {
-      country,
-      apikey: process.env.NEWS_API_KEY
+      apikey: process.env.NEWS_API_KEY,
+      language,
+      category
     };
     if (page) params.page = page;
 

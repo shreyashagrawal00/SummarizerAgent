@@ -82,8 +82,8 @@ export default function NewsFeed() {
     <div className="min-h-[calc(100vh-64px)] bg-background-light">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <header className="mb-12">
-          <h1 className="font-display text-4xl font-bold text-slate-900">Global News Feed</h1>
-          <p className="text-slate-500 mt-2">The latest updates from 200+ trusted global sources, delivered raw and unfiltered.</p>
+          <h1 className="font-display text-4xl font-bold text-slate-900">Global Intel Feed</h1>
+          <p className="text-slate-500 mt-2">Verified global updates from 200+ trusted agencies, optimized for professional insight.</p>
         </header>
 
         {isLoading ? (

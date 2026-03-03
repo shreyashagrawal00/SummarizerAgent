@@ -3,7 +3,8 @@ import { summarizeNews } from "../services/summarizerService.js";
 
 export const getNewsSummary = async (req, res) => {
   try {
-    const data = await fetchNews();
+    const { category } = req.query;
+    const data = await fetchNews(null, category || "top");
     const articles = data.results;
 
     if (!articles || articles.length === 0) {
@@ -31,8 +32,8 @@ export const getNewsSummary = async (req, res) => {
 
 export const getNews = async (req, res) => {
   try {
-    const { page } = req.query;
-    const data = await fetchNews(page);
+    const { page, category } = req.query;
+    const data = await fetchNews(page, category || "top");
     res.json({
       totalArticles: data.totalResults || 0,
       articles: data.results || [],

@@ -5,6 +5,7 @@ import { getNewsSummary, getNews, summarizeOne } from "../controllers/newsContro
 const router = express.Router();
 
 router.get("/", authMiddleware, getNews);
+router.get("/top-public", getNews); // Publicly accessible for landing page
 router.get("/summary", authMiddleware, getNewsSummary);
 router.post("/summarize-one", authMiddleware, summarizeOne);
 
