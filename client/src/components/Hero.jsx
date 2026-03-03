@@ -1,38 +1,63 @@
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import API from "../api/api";
 
 const Hero = () => {
   const navigate = useNavigate();
+  const [briefStories, setBriefStories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBrief = async () => {
+      try {
+        const res = await API.get("/news/top-public");
+        // Take the first 2 stories for the brief card
+        setBriefStories(res.data.articles.slice(0, 2));
+      } catch (err) {
+        console.error("Failed to fetch brief stories", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBrief();
+  }, []);
+
+  const today = new Date().toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
 
   return (
-    <section className="max-w-7xl mx-auto px-6 py-16 md:py-24 border-b border-slate-200">
+    <section className="max-w-7xl mx-auto px-6 pt-4 pb-10 md:pt-6 md:pb-24 border-b border-slate-200">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div className="flex flex-col gap-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider w-fit">
+        <div className="flex flex-col gap-6 lg:pl-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] sm:text-xs font-bold uppercase tracking-wider w-fit">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
             </span>
             Today's brief is ready
           </div>
-          <div className="space-y-4">
-            <h1 className="font-display text-5xl md:text-7xl font-semibold leading-[1.1] tracking-tight text-slate-900">
+          <div className="space-y-3">
+            <h1 className="font-display text-4xl md:text-6xl font-semibold leading-[1.1] tracking-tight text-slate-900">
               Your world in <br /><span className="italic text-primary">two pages.</span>
             </h1>
-            <p className="text-lg md:text-xl text-slate-600 max-w-lg leading-relaxed">
-              We distill the top 15 news stories from 200+ global sources into concise, high-quality summaries delivered to your inbox every morning. No fluff, just the facts.
+            <p className="text-base md:text-lg text-slate-600 max-w-lg leading-relaxed">
+              We distill the top news stories from 200+ global sources into concise, high-quality summaries delivered to your inbox every morning. No fluff, just the facts.
             </p>
           </div>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-3">
             <button
               onClick={() => navigate("/login")}
-              className="bg-primary text-white text-base font-bold px-8 py-4 rounded-lg hover:brightness-110 transition-all shadow-lg flex items-center gap-2"
+              className="bg-primary text-white text-sm md:text-base font-bold px-6 py-3.5 rounded-lg hover:brightness-110 transition-all shadow-lg flex items-center gap-2"
             >
               Start Reading Now
-              <span className="material-symbols-outlined">arrow_forward</span>
+              <span className="material-symbols-outlined text-xl">arrow_forward</span>
             </button>
             <button
               onClick={() => navigate("/login")}
-              className="border border-slate-300 bg-white text-slate-900 text-base font-bold px-8 py-4 rounded-lg hover:bg-slate-50 transition-all flex items-center gap-3"
+              className="border border-slate-300 bg-white text-slate-900 text-sm md:text-base font-bold px-6 py-3.5 rounded-lg hover:bg-slate-50 transition-all flex items-center gap-3"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
@@ -49,19 +74,35 @@ const Hero = () => {
             <div className="p-8 space-y-6">
               <div className="border-b-2 border-slate-900 pb-4">
                 <h3 className="font-display text-3xl font-bold">The Morning Brief</h3>
-                <p className="text-sm font-medium uppercase tracking-widest text-slate-500 mt-1">October 24, 2023</p>
+                <p className="text-sm font-medium uppercase tracking-widest text-slate-500 mt-1">{today}</p>
               </div>
               <div className="space-y-4">
-                <div className="w-full h-48 bg-slate-100 rounded"></div>
-                <h4 className="font-display text-xl font-bold leading-tight">1. Global Markets React to New Energy Infrastructure Bill</h4>
-                <p className="text-sm text-slate-600 leading-relaxed italic border-l-2 border-primary pl-4">
-                  Summary: Stocks rallied as the historic $400B green energy proposal passed the senate. Analysts expect a shift in long-term manufacturing trends across the Midwest.
-                </p>
-                <div className="h-[1px] w-full bg-slate-200"></div>
-                <h4 className="font-display text-xl font-bold leading-tight">2. Breakthrough in Solid-State Battery Tech</h4>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Summary: A joint venture in Kyoto has achieved 1,000 miles of range in standard EV chassis tests. Commercial availability projected by late 2026.
-                </p>
+                {loading ? (
+                  <div className="animate-pulse space-y-4">
+                    <div className="w-full h-48 bg-slate-100 rounded"></div>
+                    <div className="h-6 bg-slate-100 rounded w-3/4"></div>
+                    <div className="h-20 bg-slate-50 rounded"></div>
+                  </div>
+                ) : briefStories.length > 0 ? (
+                  briefStories.map((article, idx) => (
+                    <div key={idx} className="space-y-2">
+                      {idx === 0 && article.image_url && (
+                        <div className="w-full h-48 bg-slate-100 rounded overflow-hidden mb-4">
+                          <img src={article.image_url} alt={article.title} className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <h4 className="font-display text-lg font-bold leading-tight line-clamp-2">
+                        {idx + 1}. {article.title}
+                      </h4>
+                      <p className={`text-sm text-slate-600 leading-relaxed line-clamp-3 ${idx === 0 ? 'italic border-l-2 border-primary pl-4' : ''}`}>
+                        {article.description || article.content || "Click to read the full story."}
+                      </p>
+                      {idx === 0 && <div className="h-[1px] w-full bg-slate-200 mt-4"></div>}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-slate-500 text-sm italic">Real-time news loading...</p>
+                )}
               </div>
             </div>
           </div>

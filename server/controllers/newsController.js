@@ -1,13 +1,26 @@
 import { fetchNews } from "../services/newsService.js";
 import { summarizeNews } from "../services/summarizerService.js";
 
+const deduplicateArticles = (articles) => {
+  const seenTitles = new Set();
+  return (articles || []).filter(article => {
+    if (!article.title) return false;
+    const normalizedTitle = article.title.trim().toLowerCase();
+    if (seenTitles.has(normalizedTitle)) {
+      return false;
+    }
+    seenTitles.add(normalizedTitle);
+    return true;
+  });
+};
+
 export const getNewsSummary = async (req, res) => {
   try {
     const { category } = req.query;
     const data = await fetchNews(null, category || "top");
-    const articles = data.results;
+    const articles = deduplicateArticles(data.results);
 
-    if (!articles || articles.length === 0) {
+    if (articles.length === 0) {
       return res.json({ totalArticles: 0, summary: "No news found currently." });
     }
 
@@ -19,7 +32,6 @@ export const getNewsSummary = async (req, res) => {
     });
   } catch (error) {
     console.error("News summary error:", error);
-    // If it's a quota error, we should ideally tell the user
     if (error.message?.includes("quota") || error.status === 429) {
       return res.status(500).json({
         message: "AI Quota Exceeded",
@@ -35,17 +47,7 @@ export const getNews = async (req, res) => {
     const { page, category } = req.query;
     const data = await fetchNews(page, category || "top");
 
-    // Filter out duplicate headlines (often happens with syndicated news)
-    const seenTitles = new Set();
-    const uniqueArticles = (data.results || []).filter(article => {
-      if (!article.title) return false;
-      const normalizedTitle = article.title.trim().toLowerCase();
-      if (seenTitles.has(normalizedTitle)) {
-        return false;
-      }
-      seenTitles.add(normalizedTitle);
-      return true;
-    });
+    const uniqueArticles = deduplicateArticles(data.results);
 
     res.json({
       totalArticles: data.totalResults || 0,

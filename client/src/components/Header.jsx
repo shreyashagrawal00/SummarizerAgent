@@ -13,7 +13,6 @@ const Header = () => {
           <h2 className="font-display text-2xl font-bold tracking-tight">Briefly</h2>
         </div>
         <nav className="hidden md:flex items-center gap-10">
-          <a className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="#">About</a>
           {isAuthenticated && (
             <>
               <button
