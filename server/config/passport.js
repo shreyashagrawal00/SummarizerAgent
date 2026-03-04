@@ -10,7 +10,8 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: process.env.GOOGLE_CALLBACK_URL || "http://localhost:5001/api/auth/google/callback",
         accessType: "offline",
-        prompt: "consent"
+        prompt: "consent",
+        scope: ["profile", "email", "https://www.googleapis.com/auth/gmail.readonly"]
       },
       async (accessToken, refreshToken, profile, done) => {
         try {

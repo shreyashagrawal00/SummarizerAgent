@@ -22,7 +22,7 @@ export default function GmailFeed() {
         .catch(err => {
           console.error("Failed to fetch emails", err);
           if (err.response?.status === 403) {
-            setConnectError("gmail_not_connected");
+            setConnectError("gmail_permission_denied");
           } else if (err.response?.status === 401) {
             setConnectError("gmail_token_expired");
           } else {
@@ -70,17 +70,17 @@ export default function GmailFeed() {
         </header>
 
         {connectError ? (
-          <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300">
+          <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300 mx-auto max-w-2xl px-6">
             <span className="material-symbols-outlined text-5xl text-slate-300 mb-4">
-              {connectError === "gmail_not_connected" ? "mail_lock" : "sync_problem"}
+              {connectError === "gmail_permission_denied" ? "mail_lock" : "sync_problem"}
             </span>
             <h3 className="text-xl font-bold text-slate-900">
-              {connectError === "gmail_not_connected" ? "Gmail Not Connected" :
+              {connectError === "gmail_permission_denied" ? "Gmail Permission Denied" :
                 connectError === "gmail_token_expired" ? "Gmail Session Expired" :
                   "Failed to Load Emails"}
             </h3>
             <p className="text-slate-500 mt-2 mb-6">
-              {connectError === "gmail_not_connected" ? "Please sign in with Google to access your emails." :
+              {connectError === "gmail_permission_denied" ? "It looks like you didn't grant Gmail access. Please sign in again and guarantee that you check the box for Gmail permissions." :
                 connectError === "gmail_token_expired" ? "Your Google session has expired. Please sign in again." :
                   "Something went wrong fetching your emails. Try signing in with Google again."}
             </p>

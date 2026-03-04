@@ -46,6 +46,12 @@ export const getEmails = async (req, res) => {
         detail: "Please sign in with Google again to refresh your token.",
       });
     }
+    if (error.code === 403 || error.response?.status === 403) {
+      return res.status(403).json({
+        message: "Gmail permission denied",
+        detail: "Please sign in with Google and ensure you check the box to allow access to Gmail.",
+      });
+    }
     res.status(500).json({ message: "Failed to fetch emails" });
   }
 };
