@@ -69,7 +69,7 @@ export default function Dashboard() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-slate-50">
+    <div className="min-h-[calc(100vh-80px)] bg-background-light">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar / Info */}
@@ -130,7 +130,7 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <article className="prose prose-slate max-w-none">
-                    <div className="font-sans text-lg leading-relaxed text-slate-800">
+                    <div className="font-sans text-xl leading-relaxed text-slate-800">
                       {summary === "AI_QUOTA_ERROR" ? (
                         <div className="text-center py-10 bg-slate-50 rounded-xl border border-slate-200">
                           <span className="material-symbols-outlined text-4xl text-amber-500 mb-2">warning_amber</span>

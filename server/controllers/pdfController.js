@@ -34,7 +34,8 @@ export const summarizePDF = async (req, res) => {
     const truncatedText = text.substring(0, 15000);
     console.log("PDF Upload: Sending to AI summarizer...");
 
-    const summary = await summarizePDFText(truncatedText);
+    const language = req.body?.language || "en";
+    const summary = await summarizePDFText(truncatedText, language);
 
     console.log("PDF Upload: Summary generated successfully");
     res.json({ summary });

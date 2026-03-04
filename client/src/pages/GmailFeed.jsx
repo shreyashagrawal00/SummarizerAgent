@@ -59,7 +59,7 @@ export default function GmailFeed() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-background-light">
+    <div className="min-h-[calc(100vh-80px)] bg-background-light">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <header className="mb-12">
           <div className="flex items-center gap-3 mb-2">
@@ -163,7 +163,7 @@ export default function GmailFeed() {
       {/* Summary Modal */}
       {(activeSummary || error) && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden">
             <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-primary">mail</span>
@@ -191,7 +191,7 @@ export default function GmailFeed() {
                   <p className="text-slate-900 font-bold text-lg">{error}</p>
                 </div>
               ) : (
-                <article className="prose prose-slate max-w-none text-slate-700 text-lg leading-relaxed font-sans">
+                <article className="prose prose-slate max-w-none text-slate-700 text-xl leading-relaxed font-sans">
                   <ReactMarkdown>{activeSummary?.content}</ReactMarkdown>
                 </article>
               )}

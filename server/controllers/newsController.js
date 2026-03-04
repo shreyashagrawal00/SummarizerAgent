@@ -60,11 +60,11 @@ export const getNews = async (req, res) => {
 };
 
 export const summarizeOne = async (req, res) => {
-  const { article } = req.body;
+  const { article, language } = req.body;
   if (!article) return res.status(400).json({ message: "No article provided" });
 
   try {
-    const summary = await summarizeNews([article]);
+    const summary = await summarizeNews([article], language || "en");
     res.json({ summary });
   } catch (error) {
     console.error("Single article summary error:", error);

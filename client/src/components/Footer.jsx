@@ -45,7 +45,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="border-t border-slate-800 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-slate-400">© 2023 Briefly Publishing Group Inc. All rights reserved.</p>
+          <p className="text-xs text-slate-400">© 2026 Briefly Publishing Group Inc. All rights reserved.</p>
           <p className="text-xs text-slate-400 italic">Designed for clarity, read with intention.</p>
         </div>
       </div>

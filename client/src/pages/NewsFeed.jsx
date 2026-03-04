@@ -4,6 +4,22 @@ import { useAuth } from "../context/useAuth";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 
+const INDIAN_LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "hi", label: "हिन्दी" },
+  { code: "bn", label: "বাংলা" },
+  { code: "te", label: "తెలుగు" },
+  { code: "mr", label: "मराठी" },
+  { code: "ta", label: "தமிழ்" },
+  { code: "gu", label: "ગુજરાતી" },
+  { code: "kn", label: "ಕನ್ನಡ" },
+  { code: "ml", label: "മലയാളം" },
+  { code: "pa", label: "ਪੰਜਾਬੀ" },
+  { code: "or", label: "ଓଡ଼ିଆ" },
+  { code: "as", label: "অসমীয়া" },
+  { code: "ur", label: "اردو" },
+];
+
 export default function NewsFeed() {
   const [articles, setArticles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -13,6 +29,7 @@ export default function NewsFeed() {
   const [nextPage, setNextPage] = useState(null);
   const [pageHistory, setPageHistory] = useState([]);
   const [currentPageToken, setCurrentPageToken] = useState(null);
+  const [language, setLanguage] = useState("en");
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -60,10 +77,11 @@ export default function NewsFeed() {
     setSummarizingId(index);
     setError(null);
     try {
-      const res = await API.post("/news/summarize-one", { article });
+      const res = await API.post("/news/summarize-one", { article, language });
       setActiveSummary({
         title: article.title,
-        content: res.data.summary
+        content: res.data.summary,
+        language,
       });
     } catch (err) {
       console.error("Failed to summarize article", err);
@@ -80,11 +98,31 @@ export default function NewsFeed() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-background-light">
+    <div className="min-h-[calc(100vh-80px)] bg-background-light">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <header className="mb-12">
-          <h1 className="font-display text-4xl font-bold text-slate-900">Global Intel Feed</h1>
-          <p className="text-slate-500 mt-2">Verified global updates from 200+ trusted agencies, optimized for professional insight.</p>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <h1 className="font-display text-4xl font-bold text-slate-900">Global Intel Feed</h1>
+              <p className="text-slate-500 mt-2">Verified global updates from 200+ trusted agencies, optimized for professional insight.</p>
+            </div>
+            {/* Language Selector */}
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="material-symbols-outlined text-primary text-2xl">translate</span>
+              <div className="relative">
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="appearance-none bg-white border border-slate-200 rounded-xl px-4 py-3 pr-10 text-base text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all cursor-pointer shadow-sm"
+                >
+                  {INDIAN_LANGUAGES.map((lang) => (
+                    <option key={lang.code} value={lang.code}>{lang.label}</option>
+                  ))}
+                </select>
+                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-base">expand_more</span>
+              </div>
+            </div>
+          </div>
         </header>
 
         {isLoading ? (
@@ -161,7 +199,7 @@ export default function NewsFeed() {
                       ) : (
                         <span className="material-symbols-outlined text-sm">auto_awesome</span>
                       )}
-                      Summarize
+                      {language !== "en" ? INDIAN_LANGUAGES.find(l => l.code === language)?.label : "Summarize"}
                     </button>
                   </div>
                 </div>
@@ -202,13 +240,21 @@ export default function NewsFeed() {
       {/* Summary Modal */}
       {(activeSummary || error) && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-primary">auto_stories</span>
-                <h2 className="font-display text-xl font-bold text-slate-900 line-clamp-1">
-                  {error ? "Summarization Error" : activeSummary?.title}
-                </h2>
+                <div>
+                  <h2 className="font-display text-xl font-bold text-slate-900 line-clamp-1">
+                    {error ? "Summarization Error" : activeSummary?.title}
+                  </h2>
+                  {activeSummary?.language && activeSummary.language !== "en" && (
+                    <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                      <span className="material-symbols-outlined text-xs">translate</span>
+                      {INDIAN_LANGUAGES.find(l => l.code === activeSummary.language)?.label}
+                    </p>
+                  )}
+                </div>
               </div>
               <button
                 onClick={() => { setActiveSummary(null); setError(null); }}
@@ -230,7 +276,7 @@ export default function NewsFeed() {
                   <p className="text-slate-900 font-bold text-lg">{error}</p>
                 </div>
               ) : (
-                <article className="prose prose-slate max-w-none text-slate-700 text-lg leading-relaxed font-sans">
+                <article className="prose prose-slate max-w-none text-slate-700 text-xl leading-relaxed font-sans">
                   <ReactMarkdown>{activeSummary?.content}</ReactMarkdown>
                 </article>
               )}

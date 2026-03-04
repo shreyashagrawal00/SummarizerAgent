@@ -1,25 +1,41 @@
 import axios from "axios";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export const summarizeNews = async (articles) => {
+export const summarizeNews = async (articles, language = "en") => {
   if (!articles || articles.length === 0) return "No information to summarize.";
 
   const content = articles
     .map(a => `${a.title}: ${a.description || a.content || ""}`)
     .join("\n");
 
-  const prompt = `Summarize the following news articles into a concise, professional summary. Focus on the key themes and most important updates:\n\n${content}`;
+  const languageInstruction = language !== "en"
+    ? `\n\nIMPORTANT: You MUST write your entire response in the following language: ${getLanguageName(language)}. Do not use English at all in your response.`
+    : "";
+
+  const prompt = `Summarize the following news articles into a concise, professional summary. Focus on the key themes and most important updates:${languageInstruction}\n\n${content}`;
 
   return summarizeText(prompt);
 };
 
-export const summarizePDFText = async (text) => {
+export const summarizePDFText = async (text, language = "en") => {
   if (!text || text.trim().length === 0) return "No document content found to summarize.";
 
-  const prompt = `Provide a comprehensive yet concise executive summary of the following document content. Extract the most critical points, key findings, and action items if any:\n\n${text}`;
+  const languageInstruction = language !== "en"
+    ? `\n\nIMPORTANT: You MUST write your entire response in the following language: ${getLanguageName(language)}. Do not use English at all in your response.`
+    : "";
+
+  const prompt = `Provide a comprehensive yet concise executive summary of the following document content. Extract the most critical points, key findings, and action items if any:${languageInstruction}\n\n${text}`;
 
   return summarizeText(prompt);
 };
+
+const LANGUAGE_NAMES = {
+  en: "English", hi: "Hindi", bn: "Bengali", te: "Telugu", mr: "Marathi",
+  ta: "Tamil", gu: "Gujarati", kn: "Kannada", ml: "Malayalam",
+  pa: "Punjabi", or: "Odia", as: "Assamese", ur: "Urdu",
+};
+
+const getLanguageName = (code) => LANGUAGE_NAMES[code] || "English";
 
 const summarizeWithOpenRouter = async (prompt) => {
   const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
