@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import API from "../api/api";
 import { useAuth } from "../context/useAuth";
 import { useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 
 export default function GmailFeed() {
   const [emails, setEmails] = useState([]);
@@ -190,10 +191,8 @@ export default function GmailFeed() {
                   <p className="text-slate-900 font-bold text-lg">{error}</p>
                 </div>
               ) : (
-                <article className="prose prose-slate max-w-none">
-                  <p className="text-slate-700 text-lg leading-relaxed whitespace-pre-wrap">
-                    {activeSummary?.content}
-                  </p>
+                <article className="prose prose-slate max-w-none text-slate-700 text-lg leading-relaxed font-sans">
+                  <ReactMarkdown>{activeSummary?.content}</ReactMarkdown>
                 </article>
               )}
             </div>

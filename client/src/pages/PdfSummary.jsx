@@ -1,5 +1,6 @@
 import { useState } from "react";
 import API from "../api/api";
+import ReactMarkdown from "react-markdown";
 
 const PdfSummary = () => {
   const [file, setFile] = useState(null);
@@ -110,8 +111,8 @@ const PdfSummary = () => {
               <span className="material-symbols-outlined text-primary">description</span>
               <h2 className="font-display text-xl font-bold text-slate-900">Executive Summary</h2>
             </div>
-            <div className="prose prose-slate max-w-none">
-              <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{summary}</p>
+            <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed font-sans text-lg">
+              <ReactMarkdown>{summary}</ReactMarkdown>
             </div>
           </div>
         )}

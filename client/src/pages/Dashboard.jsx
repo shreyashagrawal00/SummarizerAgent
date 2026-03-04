@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import API from "../api/api";
 import { useAuth } from "../context/useAuth";
 import { useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 
 export default function Dashboard() {
   const [summary, setSummary] = useState("");
@@ -97,7 +98,7 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <article className="prose prose-slate max-w-none">
-                    <div className="whitespace-pre-wrap font-sans text-lg leading-relaxed text-slate-800">
+                    <div className="font-sans text-lg leading-relaxed text-slate-800">
                       {summary === "AI_QUOTA_ERROR" ? (
                         <div className="text-center py-10 bg-slate-50 rounded-xl border border-slate-200">
                           <span className="material-symbols-outlined text-4xl text-amber-500 mb-2">warning_amber</span>
@@ -111,7 +112,7 @@ export default function Dashboard() {
                           </button>
                         </div>
                       ) : (
-                        summary || "No summary available for today yet. Please check back later."
+                        summary ? <ReactMarkdown>{summary}</ReactMarkdown> : "No summary available for today yet. Please check back later."
                       )}
                     </div>
                   </article>
