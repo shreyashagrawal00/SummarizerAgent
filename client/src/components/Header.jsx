@@ -6,13 +6,25 @@ const Header = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-800 bg-black backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <div className="flex items-center gap-3 cursor-pointer text-white" onClick={() => navigate("/")}>
-          <span className="material-symbols-outlined text-primary text-4xl">auto_stories</span>
-          <h2 className="font-display text-3xl font-bold tracking-tight">Briefly</h2>
+          {!logoError ? (
+            <img
+              src="/logo.png"
+              alt="Briefly"
+              className="h-12 w-auto object-contain"
+              onError={() => setLogoError(true)}
+            />
+          ) : (
+            <>
+              <span className="material-symbols-outlined text-primary text-4xl">auto_stories</span>
+              <h2 className="font-display text-3xl font-bold tracking-tight">Briefly</h2>
+            </>
+          )}
         </div>
         <nav className="hidden md:flex items-center gap-10">
           {isAuthenticated && (
