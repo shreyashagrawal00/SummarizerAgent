@@ -1,6 +1,5 @@
 import axios from "axios";
-
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const summarizeNews = async (articles) => {
   if (!articles || articles.length === 0) return "No information to summarize.";
@@ -22,20 +21,19 @@ export const summarizePDFText = async (text) => {
   return summarizeText(prompt);
 };
 
-const summarizeText = async (prompt) => {
+const summarizeWithOpenRouter = async (prompt) => {
   const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-  if (!OPENROUTER_API_KEY) {
-    throw new Error("OPENROUTER_API_KEY is not set in environment variables");
-  }
+  if (!OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY not set");
 
+  // Best available models on OpenRouter (ordered by quality/reliability)
   const models = [
+    "mistralai/mistral-7b-instruct:free",
+    "meta-llama/llama-3.1-8b-instruct:free",
+    "microsoft/phi-3-mini-128k-instruct:free",
+    "nousresearch/hermes-3-llama-3.1-405b:free",
     "google/gemma-3-12b-it:free",
-    "meta-llama/llama-3.2-3b-instruct:free",
     "qwen/qwen-2.5-7b-instruct:free",
-    "google/gemma-2-9b-it:free"
   ];
-
-  let lastError = null;
 
   for (const model of models) {
     try {
@@ -43,7 +41,7 @@ const summarizeText = async (prompt) => {
       const response = await axios.post(
         "https://openrouter.ai/api/v1/chat/completions",
         {
-          model: model,
+          model,
           messages: [{ role: "user", content: prompt }],
         },
         {
@@ -53,23 +51,47 @@ const summarizeText = async (prompt) => {
             "HTTP-Referer": "http://localhost:5001",
             "X-Title": "SummarizerAgent",
           },
+          timeout: 30000,
         }
       );
 
       const text = response.data?.choices?.[0]?.message?.content;
       if (!text) throw new Error(`Empty response from ${model}`);
 
-      console.log(`Success with OpenRouter AI (${model})`);
+      console.log(`Success with OpenRouter model: ${model}`);
       return text;
     } catch (error) {
-      console.error(`Error with model ${model}:`, error.response?.data?.error?.message || error.message);
-      lastError = error;
-      // If it's a 429 Rate Limit, or something else failed, try the next model
-      // Only continue if we have more models to try
+      console.error(`OpenRouter model ${model} failed:`, error.response?.data?.error?.message || error.message);
     }
   }
+  throw new Error("All OpenRouter models failed");
+};
 
-  // If all models failed, throw the last error
-  console.error("All OpenRouter models failed. Last error:", lastError.response?.data || lastError.message);
-  throw new Error(lastError.response?.data?.error?.message || lastError.message || "Summarization failed on all models");
+const summarizeWithGemini = async (prompt) => {
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+  if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not set");
+
+  console.log("Falling back to Gemini 2.0 Flash...");
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+  if (!text) throw new Error("Empty response from Gemini");
+  console.log("Success with Gemini 2.0 Flash");
+  return text;
+};
+
+const summarizeText = async (prompt) => {
+  // Try OpenRouter first (multiple models), then fall back to Gemini
+  try {
+    return await summarizeWithOpenRouter(prompt);
+  } catch (openRouterError) {
+    console.warn("OpenRouter failed, trying Gemini fallback:", openRouterError.message);
+    try {
+      return await summarizeWithGemini(prompt);
+    } catch (geminiError) {
+      console.error("Gemini also failed:", geminiError.message);
+      throw new Error(`Summarization failed. OpenRouter: ${openRouterError.message}. Gemini: ${geminiError.message}`);
+    }
+  }
 };
