@@ -7,6 +7,7 @@ import Register from './pages/Register'
 import NewsFeed from './pages/NewsFeed'
 import GmailFeed from './pages/GmailFeed'
 import Dashboard from './pages/Dashboard'
+import PdfSummary from './pages/PdfSummary'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
               <Route path="/feed" element={<NewsFeed />} />
               <Route path="/gmail" element={<GmailFeed />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/pdf" element={<PdfSummary />} />
             </Routes>
           </main>
           <Footer />

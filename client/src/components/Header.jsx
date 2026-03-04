@@ -27,6 +27,12 @@ const Header = () => {
               >
                 Gmail
               </button>
+              <button
+                onClick={() => navigate("/pdf")}
+                className="text-sm font-medium text-slate-300 hover:text-white transition-colors bg-transparent border-none cursor-pointer"
+              >
+                PDF Summary
+              </button>
             </>
           )}
         </nav>
