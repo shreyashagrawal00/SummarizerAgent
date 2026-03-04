@@ -29,8 +29,8 @@ const Hero = () => {
   });
 
   return (
-    <section className="max-w-7xl mx-auto px-6 pt-4 pb-10 md:pt-6 md:pb-24 border-b border-slate-200">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 pb-10 md:pt-6 md:pb-24 border-b border-slate-200">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center">
         <div className="flex flex-col gap-6 lg:pl-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] sm:text-xs font-bold uppercase tracking-wider w-fit">
             <span className="relative flex h-2 w-2">
@@ -40,7 +40,7 @@ const Hero = () => {
             Today's brief is ready
           </div>
           <div className="space-y-3">
-            <h1 className="font-display text-4xl md:text-6xl font-semibold leading-[1.1] tracking-tight text-slate-900">
+            <h1 className="font-display text-3xl sm:text-4xl md:text-6xl font-semibold leading-[1.1] tracking-tight text-slate-900">
               Your world in <br /><span className="italic text-primary">two pages.</span>
             </h1>
             <p className="text-base md:text-lg text-slate-600 max-w-lg leading-relaxed">

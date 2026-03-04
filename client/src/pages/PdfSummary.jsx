@@ -99,13 +99,13 @@ const PdfSummary = () => {
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="space-y-8">
           <div className="text-center space-y-3">
-            <h1 className="font-display text-4xl font-bold text-slate-900">PDF Summarizer</h1>
-            <p className="text-slate-600 text-lg">Upload any PDF document and let our AI distill it into a concise summary.</p>
+            <h1 className="font-display text-3xl sm:text-4xl font-bold text-slate-900">PDF Summarizer</h1>
+            <p className="text-slate-600 text-base sm:text-lg">Upload any PDF document and let our AI distill it into a concise summary.</p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-8">
             <form onSubmit={handleUpload} className="space-y-6">
-              <div className="border-2 border-dashed border-slate-200 rounded-xl p-12 text-center hover:border-primary transition-colors cursor-pointer group relative">
+              <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 sm:p-12 text-center hover:border-primary transition-colors cursor-pointer group relative">
                 <input
                   type="file"
                   accept="application/pdf"
@@ -186,7 +186,7 @@ const PdfSummary = () => {
 
           {summary && (
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="flex items-center justify-between border-b border-slate-100 p-8 pb-4 bg-slate-50/50">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 p-6 sm:p-8 pb-4 sm:pb-4 gap-4 bg-slate-50/50">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-primary">description</span>
                   <div>
@@ -211,7 +211,7 @@ const PdfSummary = () => {
                   )}
                 </button>
               </div>
-              <div id="pdf-content" className="p-8 pt-6">
+              <div id="pdf-content" className="p-6 sm:p-10 pt-6">
                 <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed font-sans text-lg">
                   <ReactMarkdown>{summary}</ReactMarkdown>
                 </div>

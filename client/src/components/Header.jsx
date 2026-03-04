@@ -1,9 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
+import { useState } from "react";
 
 const Header = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-800 bg-black backdrop-blur-md">
@@ -40,7 +42,7 @@ const Header = () => {
           {isAuthenticated ? (
             <button
               onClick={() => navigate("/dashboard")}
-              className="bg-primary text-white text-base font-bold px-8 py-3 rounded-xl hover:brightness-110 transition-all shadow-md"
+              className="bg-primary text-white text-base font-bold px-8 py-3 rounded-xl hover:brightness-110 transition-all shadow-md hidden sm:block"
             >
               Dashboard
             </button>
@@ -54,14 +56,76 @@ const Header = () => {
               </button>
               <button
                 onClick={() => navigate("/login")}
-                className="bg-primary text-white text-base font-bold px-8 py-3 rounded-xl hover:brightness-110 transition-all shadow-md"
+                className="bg-primary text-white text-base font-bold px-8 py-3 rounded-xl hover:brightness-110 transition-all shadow-md hidden sm:block"
               >
                 Get Started
               </button>
             </>
           )}
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden text-white p-2 hover:bg-slate-800 rounded-lg transition-colors"
+          >
+            <span className="material-symbols-outlined text-3xl">
+              {isMobileMenuOpen ? "close" : "menu"}
+            </span>
+          </button>
         </div>
       </div>
+
+      {/* Mobile Nav Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-slate-900 border-t border-slate-800 animate-in slide-in-from-top duration-300">
+          <nav className="flex flex-col p-6 gap-6">
+            {isAuthenticated && (
+              <>
+                <button
+                  onClick={() => { navigate("/feed"); setIsMobileMenuOpen(false); }}
+                  className="text-lg font-bold text-slate-300 hover:text-white transition-colors text-left"
+                >
+                  Feed
+                </button>
+                <button
+                  onClick={() => { navigate("/gmail"); setIsMobileMenuOpen(false); }}
+                  className="text-lg font-bold text-slate-300 hover:text-white transition-colors text-left"
+                >
+                  Gmail
+                </button>
+                <button
+                  onClick={() => { navigate("/pdf"); setIsMobileMenuOpen(false); }}
+                  className="text-lg font-bold text-slate-300 hover:text-white transition-colors text-left"
+                >
+                  PDF Summary
+                </button>
+                <button
+                  onClick={() => { navigate("/dashboard"); setIsMobileMenuOpen(false); }}
+                  className="text-lg font-bold text-primary transition-colors text-left block sm:hidden"
+                >
+                  Dashboard
+                </button>
+              </>
+            )}
+            {!isAuthenticated && (
+              <>
+                <button
+                  onClick={() => { navigate("/login"); setIsMobileMenuOpen(false); }}
+                  className="text-lg font-bold text-slate-300 hover:text-white transition-colors text-left"
+                >
+                  Sign in
+                </button>
+                <button
+                  onClick={() => { navigate("/login"); setIsMobileMenuOpen(false); }}
+                  className="text-lg font-bold text-primary transition-colors text-left sm:hidden"
+                >
+                  Get Started
+                </button>
+              </>
+            )}
+          </nav>
+        </div>
+      )}
     </header>
   );
 };

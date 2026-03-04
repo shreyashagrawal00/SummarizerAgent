@@ -70,10 +70,10 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-[calc(100vh-80px)] bg-background-light">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex flex-col md:flex-row gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar / Info */}
-          <aside className="w-full md:w-80 space-y-6">
+          <aside className="w-full lg:w-80 space-y-6">
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
               <h3 className="font-display text-xl font-bold mb-4">Your Account</h3>
               <div className="space-y-4">
@@ -107,17 +107,17 @@ export default function Dashboard() {
           {/* Main Content */}
           <main className="flex-1">
             <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden min-h-[600px] flex flex-col">
-              <div className="border-b border-slate-100 p-8 flex items-center justify-between bg-slate-50/50">
+              <div className="border-b border-slate-100 p-6 md:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
                 <div>
-                  <h1 className="font-display text-3xl font-bold text-slate-900">Today's Morning Brief</h1>
-                  <p className="text-slate-500 mt-1 capitalize">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                  <h1 className="font-display text-2xl md:text-3xl font-bold text-slate-900 leading-tight">Today's Morning Brief</h1>
+                  <p className="text-slate-500 mt-1 capitalize text-sm">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
                 </div>
                 <button className="p-2 rounded-lg hover:bg-slate-200 transition-colors text-slate-400">
                   <span className="material-symbols-outlined">share</span>
                 </button>
               </div>
 
-              <div id="pdf-content" className="p-8 md:p-12 flex-1">
+              <div id="pdf-content" className="p-6 md:p-12 flex-1">
                 {isLoading ? (
                   <div className="space-y-8 animate-pulse">
                     <div className="h-8 bg-slate-100 rounded-lg w-1/2"></div>
