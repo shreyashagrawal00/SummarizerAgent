@@ -1,6 +1,6 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import axios from "axios";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
 export const summarizeNews = async (articles) => {
   if (!articles || articles.length === 0) return "No information to summarize.";
@@ -23,18 +23,35 @@ export const summarizePDFText = async (text) => {
 };
 
 const summarizeText = async (prompt) => {
+  const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+  if (!OPENROUTER_API_KEY) {
+    throw new Error("OPENROUTER_API_KEY is not set in environment variables");
+  }
+
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const response = await axios.post(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        model: "google/gemma-3-12b-it:free",
+        messages: [{ role: "user", content: prompt }],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "http://localhost:5001",
+          "X-Title": "SummarizerAgent",
+        },
+      }
+    );
 
-    if (!text) throw new Error("Empty response from Gemini AI");
+    const text = response.data?.choices?.[0]?.message?.content;
+    if (!text) throw new Error("Empty response from OpenRouter");
 
-    console.log("Success with Gemini AI");
+    console.log("Success with OpenRouter AI");
     return text;
   } catch (error) {
-    console.error("Gemini AI Summarization Error:", error);
-    throw error;
+    console.error("OpenRouter Summarization Error:", error.response?.data || error.message);
+    throw new Error(error.response?.data?.error?.message || error.message || "Summarization failed");
   }
 };

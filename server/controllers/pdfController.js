@@ -1,6 +1,6 @@
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-const pdf = require("pdf-parse");
+const { PDFParse, VerbosityLevel } = require("pdf-parse");
 
 import { summarizePDFText } from "../services/summarizerService.js";
 
@@ -14,11 +14,15 @@ export const summarizePDF = async (req, res) => {
 
     console.log(`PDF Upload: Processing ${req.file.originalname} (${req.file.size} bytes)`);
 
-    // Extract text from PDF buffer
-    // pdf-parse is a CommonJS module that returns a function
-    const data = await pdf(req.file.buffer);
-    const text = data.text;
+    // pdf-parse v2: pass buffer via { data: buffer } constructor option, then call getText()
+    const parser = new PDFParse({
+      data: req.file.buffer,
+      verbosity: VerbosityLevel.ERRORS,
+    });
+    const result = await parser.getText();
+    await parser.destroy();
 
+    const text = result.text;
     console.log(`PDF Upload: Extracted ${text?.length || 0} characters`);
 
     if (!text || text.trim().length === 0) {
@@ -26,9 +30,9 @@ export const summarizePDF = async (req, res) => {
       return res.status(400).json({ message: "Could not extract text from PDF. It might be an image-only PDF." });
     }
 
-    // Limit text size to avoid token issues (approx 15k chars for now)
+    // Limit text size to avoid token issues (approx 15k chars)
     const truncatedText = text.substring(0, 15000);
-    console.log("PDF Upload: Sending to Gemini summarizer...");
+    console.log("PDF Upload: Sending to AI summarizer...");
 
     const summary = await summarizePDFText(truncatedText);
 
