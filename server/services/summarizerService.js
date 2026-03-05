@@ -29,6 +29,48 @@ export const summarizePDFText = async (text, language = "en") => {
   return summarizeText(prompt);
 };
 
+export const summarizeVideoText = async (text, language = "en") => {
+  if (!text || text.trim().length === 0) return "No video content found to summarize.";
+
+  const languageInstruction = language !== "en"
+    ? `\n\nIMPORTANT: You MUST write your entire response in the following language: ${getLanguageName(language)}. Do not use English at all in your response.`
+    : "";
+
+  const prompt = `Summarize the following YouTube video transcript. Highlight the main topics discussed, key takeaways, and any important conclusions:${languageInstruction}\n\n${text}`;
+
+  return summarizeText(prompt);
+};
+
+export const summarizeWebText = async (text, language = "en") => {
+  if (!text || text.trim().length === 0) return "No webpage content found to summarize.";
+
+  const languageInstruction = language !== "en"
+    ? `\n\nIMPORTANT: You MUST write your entire response in the following language: ${getLanguageName(language)}. Do not use English at all in your response.`
+    : "";
+
+  const prompt = `Summarize the following text extracted from a webpage. Provide a clear overview of the article, identifying its main purpose and summarizing its key points:${languageInstruction}\n\n${text}`;
+
+  return summarizeText(prompt);
+};
+
+export const askQuestion = async (contextText, question, language = "en", history = []) => {
+  if (!contextText || contextText.trim().length === 0) return "I don't have enough context to answer that.";
+  if (!question || question.trim().length === 0) return "Please ask a specific question.";
+
+  const languageInstruction = language !== "en"
+    ? `\n\nIMPORTANT: You MUST write your entire response in the following language: ${getLanguageName(language)}. Do not use English at all in your response.`
+    : "";
+
+  let historyStr = "";
+  if (history && history.length > 0) {
+    historyStr = "Conversation History:\n" + history.map(msg => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`).join("\n") + "\n\n";
+  }
+
+  const prompt = `Use the following document text and the conversation history to answer the user's latest question accurately. If the answer cannot be reasonably inferred from the document text, politely state that you cannot find the answer in the provided document.\n\nDocument Text:\n${contextText}\n\n${historyStr}Latest Question:\n${question}${languageInstruction}`;
+
+  return summarizeText(prompt);
+};
+
 const LANGUAGE_NAMES = {
   en: "English", hi: "Hindi", bn: "Bengali", te: "Telugu", mr: "Marathi",
   ta: "Tamil", gu: "Gujarati", kn: "Kannada", ml: "Malayalam",

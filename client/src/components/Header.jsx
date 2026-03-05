@@ -47,6 +47,18 @@ const Header = () => {
               >
                 PDF Summary
               </button>
+              <button
+                onClick={() => navigate("/youtube")}
+                className="text-base font-bold text-slate-300 hover:text-white transition-colors bg-transparent border-none cursor-pointer"
+              >
+                YouTube
+              </button>
+              <button
+                onClick={() => navigate("/web")}
+                className="text-base font-bold text-slate-300 hover:text-white transition-colors bg-transparent border-none cursor-pointer"
+              >
+                Web
+              </button>
             </>
           )}
         </nav>
@@ -110,6 +122,18 @@ const Header = () => {
                   className="text-lg font-bold text-slate-300 hover:text-white transition-colors text-left"
                 >
                   PDF Summary
+                </button>
+                <button
+                  onClick={() => { navigate("/youtube"); setIsMobileMenuOpen(false); }}
+                  className="text-lg font-bold text-slate-300 hover:text-white transition-colors text-left"
+                >
+                  YouTube
+                </button>
+                <button
+                  onClick={() => { navigate("/web"); setIsMobileMenuOpen(false); }}
+                  className="text-lg font-bold text-slate-300 hover:text-white transition-colors text-left"
+                >
+                  Web
                 </button>
                 <button
                   onClick={() => { navigate("/dashboard"); setIsMobileMenuOpen(false); }}

@@ -3,6 +3,7 @@ import API from "../api/api";
 import ReactMarkdown from "react-markdown";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+import ChatBox from "../components/ChatBox";
 
 const INDIAN_LANGUAGES = [
   { code: "en", label: "English" },
@@ -216,6 +217,9 @@ const PdfSummary = () => {
                   <ReactMarkdown>{summary}</ReactMarkdown>
                 </div>
               </div>
+
+              {/* Chat Interface */}
+              <ChatBox contextText={summary} sourceName="PDF Document" language={language} />
             </div>
           )}
         </div>

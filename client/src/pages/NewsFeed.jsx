@@ -268,7 +268,7 @@ export default function NewsFeed() {
                 <div className="text-center py-6">
                   <span className="material-symbols-outlined text-5xl text-amber-500 mb-4">warning_amber</span>
                   <p className="text-slate-900 font-bold text-lg">AI Quota Exceeded</p>
-                  <p className="text-slate-500 mt-2">Your OpenAI API key has exceeded its limit. Please check your billing details to continue using AI summaries.</p>
+                  <p className="text-slate-500 mt-2">Your AI API key has exceeded its limit. Please check your billing details to continue using AI summaries.</p>
                 </div>
               ) : error ? (
                 <div className="text-center py-6">
