@@ -59,27 +59,27 @@ export default function GmailFeed() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-background-light">
+    <div className="min-h-[calc(100vh-80px)] bg-background-light dark:bg-slate-950 transition-colors">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <header className="mb-12">
           <div className="flex items-center gap-3 mb-2">
             <span className="material-symbols-outlined text-primary text-3xl sm:text-4xl">mail</span>
-            <h1 className="font-display text-3xl sm:text-4xl font-bold text-slate-900">Gmail Inbox</h1>
+            <h1 className="font-display text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white transition-colors">Gmail Inbox</h1>
           </div>
-          <p className="text-slate-500 mt-2">Your recent emails, with AI-powered summarization at your fingertips.</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-2 transition-colors">Your recent emails, with AI-powered summarization at your fingertips.</p>
         </header>
 
         {connectError ? (
-          <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300 mx-auto max-w-2xl px-6">
-            <span className="material-symbols-outlined text-5xl text-slate-300 mb-4">
+          <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 mx-auto max-w-2xl px-6 transition-colors">
+            <span className="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-700 mb-4">
               {connectError === "gmail_permission_denied" ? "mail_lock" : "sync_problem"}
             </span>
-            <h3 className="text-xl font-bold text-slate-900">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
               {connectError === "gmail_permission_denied" ? "Gmail Permission Denied" :
                 connectError === "gmail_token_expired" ? "Gmail Session Expired" :
                   "Failed to Load Emails"}
             </h3>
-            <p className="text-slate-500 mt-2 mb-6">
+            <p className="text-slate-500 dark:text-slate-400 mt-2 mb-6">
               {connectError === "gmail_permission_denied" ? "It looks like you didn't grant Gmail access. Please sign in again and guarantee that you check the box for Gmail permissions." :
                 connectError === "gmail_token_expired" ? "Your Google session has expired. Please sign in again." :
                   "Something went wrong fetching your emails. Try signing in with Google again."}
@@ -94,13 +94,13 @@ export default function GmailFeed() {
         ) : isLoading ? (
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm animate-pulse">
+              <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm animate-pulse transition-colors">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 flex-shrink-0"></div>
+                  <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex-shrink-0"></div>
                   <div className="flex-1 space-y-3">
-                    <div className="h-4 bg-slate-100 rounded w-1/3"></div>
-                    <div className="h-5 bg-slate-100 rounded w-2/3"></div>
-                    <div className="h-4 bg-slate-100 rounded w-full"></div>
+                    <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-1/3"></div>
+                    <div className="h-5 bg-slate-100 dark:bg-slate-800 rounded w-2/3"></div>
+                    <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-full"></div>
                   </div>
                 </div>
               </div>
@@ -113,22 +113,22 @@ export default function GmailFeed() {
               const initials = senderName?.charAt(0)?.toUpperCase() || "?";
 
               return (
-                <div key={email.id || index} className="group bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                <div key={email.id || index} className="group bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 text-primary flex items-center justify-center font-bold text-sm flex-shrink-0">
                       {initials}
                     </div>
                     <div className="flex-1 min-w-0 overflow-hidden">
                       <div className="flex items-center justify-between gap-4 mb-1">
-                        <p className="text-sm font-bold text-slate-900 truncate">{senderName}</p>
-                        <span className="text-xs text-slate-400 whitespace-nowrap flex-shrink-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-white transition-colors truncate">{senderName}</p>
+                        <span className="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap flex-shrink-0">
                           {email.date ? new Date(email.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ""}
                         </span>
                       </div>
-                      <h3 className="font-display text-lg font-bold text-slate-900 mb-2 truncate">
+                      <h3 className="font-display text-lg font-bold text-slate-900 dark:text-white mb-2 transition-colors truncate">
                         {email.subject || "(No Subject)"}
                       </h3>
-                      <p className="text-slate-500 text-sm line-clamp-2">
+                      <p className="text-slate-500 dark:text-slate-400 text-sm line-clamp-2 transition-colors">
                         {email.snippet || "No preview available."}
                       </p>
                       <div className="mt-4 flex items-center gap-3">
@@ -152,28 +152,28 @@ export default function GmailFeed() {
             })}
           </div>
         ) : (
-          <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300">
-            <span className="material-symbols-outlined text-5xl text-slate-300 mb-4">inbox</span>
-            <h3 className="text-xl font-bold text-slate-900">No emails found</h3>
-            <p className="text-slate-500 mt-2">Your inbox appears to be empty. Check back later.</p>
+          <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 transition-colors">
+            <span className="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-700 mb-4">inbox</span>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white">No emails found</h3>
+            <p className="text-slate-500 dark:text-slate-400 mt-2">Your inbox appears to be empty. Check back later.</p>
           </div>
         )}
       </div>
 
       {/* Summary Modal */}
       {(activeSummary || error) && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden">
-            <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden border border-slate-200 dark:border-slate-800 transition-colors">
+            <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-primary">mail</span>
-                <h2 className="font-display text-xl font-bold text-slate-900 line-clamp-1">
+                <h2 className="font-display text-xl font-bold text-slate-900 dark:text-white line-clamp-1">
                   {error ? "Summarization Error" : activeSummary?.title}
                 </h2>
               </div>
               <button
                 onClick={() => { setActiveSummary(null); setError(null); }}
-                className="w-10 h-10 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-400 transition-colors"
+                className="w-10 h-10 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
               >
                 <span className="material-symbols-outlined text-xl">close</span>
               </button>
@@ -182,24 +182,24 @@ export default function GmailFeed() {
               {error === "QUOTA_ERROR" ? (
                 <div className="text-center py-6">
                   <span className="material-symbols-outlined text-5xl text-amber-500 mb-4">warning_amber</span>
-                  <p className="text-slate-900 font-bold text-lg">AI Quota Exceeded</p>
-                  <p className="text-slate-500 mt-2">Your AI API key has exceeded its limit. Please wait or update your billing details.</p>
+                  <p className="text-slate-900 dark:text-white font-bold text-lg">AI Quota Exceeded</p>
+                  <p className="text-slate-500 dark:text-slate-400 mt-2">Your AI API key has exceeded its limit. Please wait or update your billing details.</p>
                 </div>
               ) : error ? (
                 <div className="text-center py-6">
                   <span className="material-symbols-outlined text-5xl text-red-400 mb-4">error_outline</span>
-                  <p className="text-slate-900 font-bold text-lg">{error}</p>
+                  <p className="text-slate-900 dark:text-white font-bold text-lg">{error}</p>
                 </div>
               ) : (
-                <article className="prose prose-slate max-w-none text-slate-700 text-xl leading-relaxed font-sans">
+                <article className="prose prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 text-xl leading-relaxed font-sans">
                   <ReactMarkdown>{activeSummary?.content}</ReactMarkdown>
                 </article>
               )}
             </div>
-            <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end">
+            <div className="p-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex justify-end">
               <button
                 onClick={() => { setActiveSummary(null); setError(null); }}
-                className="bg-slate-900 text-white font-bold px-8 py-3 rounded-xl hover:brightness-110 transition-all shadow-md active:scale-95"
+                className="bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-bold px-8 py-3 rounded-xl hover:brightness-110 transition-all shadow-md active:scale-95"
               >
                 Got it
               </button>

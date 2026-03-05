@@ -1,5 +1,6 @@
 import axios from "axios";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 
 export const summarizeNews = async (articles, language = "en") => {
   if (!articles || articles.length === 0) return "No information to summarize.";
@@ -79,6 +80,31 @@ const LANGUAGE_NAMES = {
 
 const getLanguageName = (code) => LANGUAGE_NAMES[code] || "English";
 
+const summarizeWithNvidia = async (prompt) => {
+  const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY;
+  if (!NVIDIA_API_KEY) throw new Error("NVIDIA_API_KEY not set");
+
+  console.log("Using Nvidia AI provider...");
+  const openai = new OpenAI({
+    apiKey: NVIDIA_API_KEY,
+    baseURL: 'https://integrate.api.nvidia.com/v1',
+  });
+
+  const completion = await openai.chat.completions.create({
+    model: "thudm/chatglm3-6b",
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.5,
+    top_p: 1,
+    max_tokens: 1024,
+  });
+
+  const text = completion.choices[0]?.message?.content;
+  if (!text) throw new Error("Empty response from Nvidia AI");
+
+  console.log("Success with Nvidia AI");
+  return text;
+};
+
 const summarizeWithOpenRouter = async (prompt) => {
   const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
   if (!OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY not set");
@@ -140,16 +166,21 @@ const summarizeWithGemini = async (prompt) => {
 };
 
 const summarizeText = async (prompt) => {
-  // Try OpenRouter first (multiple models), then fall back to Gemini
+  // Try Nvidia first, then fall back to OpenRouter/Gemini
   try {
-    return await summarizeWithOpenRouter(prompt);
-  } catch (openRouterError) {
-    console.warn("OpenRouter failed, trying Gemini fallback:", openRouterError.message);
+    return await summarizeWithNvidia(prompt);
+  } catch (nvidiaError) {
+    console.warn("Nvidia failed, trying OpenRouter fallback:", nvidiaError.message);
     try {
-      return await summarizeWithGemini(prompt);
-    } catch (geminiError) {
-      console.error("Gemini also failed:", geminiError.message);
-      throw new Error(`Summarization failed. OpenRouter: ${openRouterError.message}. Gemini: ${geminiError.message}`);
+      return await summarizeWithOpenRouter(prompt);
+    } catch (openRouterError) {
+      console.warn("OpenRouter failed, trying Gemini fallback:", openRouterError.message);
+      try {
+        return await summarizeWithGemini(prompt);
+      } catch (geminiError) {
+        console.error("Gemini also failed:", geminiError.message);
+        throw new Error(`Summarization failed. Nvidia: ${nvidiaError.message}. OpenRouter: ${openRouterError.message}. Gemini: ${geminiError.message}`);
+      }
     }
   }
 };
