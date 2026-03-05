@@ -46,24 +46,24 @@ export default function WebSummary() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-background-light">
+    <div className="min-h-[calc(100vh-80px)] bg-background-light dark:bg-slate-950 transition-colors duration-200">
       <div className="max-w-4xl mx-auto px-6 py-12">
         <header className="mb-12">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <span className="material-symbols-outlined text-blue-600 text-3xl sm:text-4xl">language</span>
-                <h1 className="font-display text-3xl sm:text-4xl font-bold text-slate-900">Webpage Summarizer</h1>
+                <span className="material-symbols-outlined text-blue-600 dark:text-blue-500 text-3xl sm:text-4xl transition-colors">language</span>
+                <h1 className="font-display text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white transition-colors">Webpage Summarizer</h1>
               </div>
-              <p className="text-slate-500 mt-2">Paste any website URL to extract the main article and get a quick summary.</p>
+              <p className="text-slate-500 dark:text-slate-400 mt-2 transition-colors">Paste any website URL to extract the main article and get a quick summary.</p>
             </div>
           </div>
         </header>
 
-        <div className="bg-white rounded-2xl p-6 sm:p-12 border border-slate-200 shadow-sm mb-12 flex flex-col items-center">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-12 border border-slate-200 dark:border-slate-800 shadow-sm mb-12 flex flex-col items-center transition-colors">
 
           <div className="w-full max-w-2xl mb-8">
-            <label className="block text-sm font-bold text-slate-700 mb-2">Website URL</label>
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 transition-colors">Website URL</label>
             <input
               type="url"
               placeholder="https://example.com/long-article"
@@ -72,7 +72,7 @@ export default function WebSummary() {
                 setUrl(e.target.value);
                 setError(null);
               }}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             />
           </div>
 
@@ -82,7 +82,7 @@ export default function WebSummary() {
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl focus:ring-primary focus:border-primary block w-full p-2.5 outline-none font-bold"
+                className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm rounded-xl focus:ring-primary focus:border-primary block w-full p-2.5 outline-none font-bold transition-colors"
               >
                 <option value="en">English (default)</option>
                 <option value="es">Spanish</option>
@@ -114,24 +114,24 @@ export default function WebSummary() {
           </div>
 
           {error && (
-            <div className="w-full max-w-2xl bg-amber-50 rounded-xl p-4 border border-amber-200 flex items-start gap-3 text-left">
+            <div className="w-full max-w-2xl bg-amber-50 dark:bg-amber-900/30 rounded-xl p-4 border border-amber-200 dark:border-amber-800 flex items-start gap-3 text-left transition-colors">
               <span className="material-symbols-outlined text-amber-500 flex-shrink-0">warning</span>
-              <p className="text-sm font-bold text-amber-800">{error}</p>
+              <p className="text-sm font-bold text-amber-800 dark:text-amber-200 transition-colors">{error}</p>
             </div>
           )}
 
         </div>
 
         {summary && (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-500">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 flex-wrap gap-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-500 transition-colors">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50 flex-wrap gap-4 transition-colors">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-green-500">check_circle</span>
-                <h2 className="font-display text-xl font-bold text-slate-900">Summary Generated</h2>
+                <h2 className="font-display text-xl font-bold text-slate-900 dark:text-white transition-colors">Summary Generated</h2>
               </div>
             </div>
             <div className="p-8 sm:p-12">
-              <article className="prose prose-slate max-w-none text-slate-700 text-lg leading-relaxed font-sans">
+              <article className="prose prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 text-lg leading-relaxed font-sans transition-colors">
                 <ReactMarkdown>{summary}</ReactMarkdown>
               </article>
             </div>

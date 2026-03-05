@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
+import { useTheme } from "../context/useTheme";
 import { useState } from "react";
 
 const Header = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [logoError, setLogoError] = useState(false);
 
@@ -63,6 +65,15 @@ const Header = () => {
           )}
         </nav>
         <div className="flex items-center gap-4">
+          <button
+            onClick={toggleTheme}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            <span className="material-symbols-outlined text-xl">
+              {theme === "dark" ? "light_mode" : "dark_mode"}
+            </span>
+          </button>
           {isAuthenticated ? (
             <button
               onClick={() => navigate("/dashboard")}
