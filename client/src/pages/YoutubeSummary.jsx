@@ -5,12 +5,89 @@ import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import ChatBox from "../components/ChatBox";
 
+// Fetches transcript client-side (using user's IP — never rate limited)
+async function fetchTranscriptClientSide(videoId) {
+  // Step 1: fetch the YouTube watch page from the user's browser
+  const pageRes = await fetch(
+    `https://www.youtube.com/watch?v=${videoId}`,
+    {
+      headers: { "Accept-Language": "en-US,en;q=0.9" },
+    }
+  );
+  if (!pageRes.ok) throw new Error("Could not load YouTube page");
+  const html = await pageRes.text();
+
+  // Step 2: extract captionTracks JSON using bracket-depth walker
+  const marker = '"captionTracks":';
+  const markerIdx = html.indexOf(marker);
+  if (markerIdx === -1) throw new Error("No captions found for this video");
+
+  let i = markerIdx + marker.length;
+  while (i < html.length && html[i] !== "[") i++;
+  let depth = 0;
+  const jsonStart = i;
+  for (; i < html.length; i++) {
+    if (html[i] === "[" || html[i] === "{") depth++;
+    else if (html[i] === "]" || html[i] === "}") {
+      depth--;
+      if (depth === 0) break;
+    }
+  }
+  const captionTracks = JSON.parse(html.slice(jsonStart, i + 1));
+  if (!captionTracks?.length) throw new Error("No caption tracks found");
+
+  // Step 3: pick best English track
+  const track =
+    captionTracks.find((t) => t.languageCode === "en" && !t.kind) ||
+    captionTracks.find((t) => t.languageCode === "en") ||
+    captionTracks.find((t) => t.languageCode?.startsWith("en")) ||
+    captionTracks[0];
+
+  if (!track?.baseUrl) throw new Error("No caption URL found");
+
+  // Step 4: download the caption JSON
+  const captionRes = await fetch(track.baseUrl + "&fmt=json3");
+  if (!captionRes.ok) throw new Error("Could not download captions");
+  const captionJson = await captionRes.json();
+
+  if (!captionJson?.events?.length) throw new Error("Caption data is empty");
+
+  // Step 5: convert to plain text
+  const text = captionJson.events
+    .filter((e) => e.segs)
+    .map((e) => e.segs.map((s) => s.utf8 || "").join(""))
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!text) throw new Error("Could not extract text from captions");
+  return text;
+}
+
+function extractVideoId(url) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname.includes("youtube.com")) {
+      const v = parsed.searchParams.get("v");
+      if (v && v.length === 11) return v;
+    }
+    if (parsed.hostname === "youtu.be") {
+      const id = parsed.pathname.slice(1).split("?")[0];
+      if (id && id.length === 11) return id;
+    }
+  } catch (_) {}
+  const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return match ? match[1] : null;
+}
+
 export default function YoutubeSummary() {
   const [url, setUrl] = useState("");
   const [language, setLanguage] = useState("en");
+  const [isFetching, setIsFetching] = useState(false);
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [summary, setSummary] = useState(null);
   const [error, setError] = useState(null);
+  const [statusMsg, setStatusMsg] = useState("");
 
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -21,41 +98,58 @@ export default function YoutubeSummary() {
   }
 
   const handleSummarize = async () => {
-    let finalUrl = url.trim();
-
-    if (!finalUrl) {
+    const trimmedUrl = url.trim();
+    if (!trimmedUrl) {
       setError("Please paste a valid YouTube URL.");
       return;
     }
 
-    if (!finalUrl.includes("youtube.com") && !finalUrl.includes("youtu.be")) {
-      // If it looks like a raw 11-character video ID, convert it
-      if (/^[a-zA-Z0-9_-]{11}$/.test(finalUrl)) {
-        finalUrl = `https://www.youtube.com/watch?v=${finalUrl}`;
-      } else {
-        setError("Please enter a valid YouTube link or video ID.");
-        return;
-      }
+    const videoId = extractVideoId(trimmedUrl);
+    if (!videoId) {
+      setError("Please enter a valid YouTube link.");
+      return;
     }
 
-    setIsSummarizing(true);
     setError(null);
     setSummary(null);
+    setIsFetching(true);
+    setStatusMsg("Fetching transcript from YouTube...");
+
+    let transcript;
+    try {
+      transcript = await fetchTranscriptClientSide(videoId);
+    } catch (err) {
+      setIsFetching(false);
+      setStatusMsg("");
+      setError(
+        err.message?.includes("No captions") || err.message?.includes("No caption")
+          ? "This video does not have captions enabled. Please try a video with captions."
+          : `Could not fetch transcript: ${err.message}`
+      );
+      return;
+    }
+
+    setIsFetching(false);
+    setIsSummarizing(true);
+    setStatusMsg("Generating AI summary...");
 
     try {
-      const res = await API.post("/youtube/summarize", { url: finalUrl, language });
+      const res = await API.post("/youtube/summarize", { transcript, language });
       setSummary(res.data.summary);
     } catch (err) {
       console.error("YouTube Summary Error:", err);
       if (err.response?.data?.message === "AI Quota Exceeded") {
         setError("AI Quota Exceeded. Please check your AI service billing details.");
       } else {
-        setError(err.response?.data?.message || "Failed to summarize video. It may not have captions.");
+        setError(err.response?.data?.message || "Failed to generate summary. Please try again.");
       }
     } finally {
       setIsSummarizing(false);
+      setStatusMsg("");
     }
   };
+
+  const isLoading = isFetching || isSummarizing;
 
   return (
     <div className="min-h-[calc(100vh-80px)] bg-background-light dark:bg-slate-950 transition-colors duration-200">
@@ -73,17 +167,13 @@ export default function YoutubeSummary() {
         </header>
 
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-12 border border-slate-200 dark:border-slate-800 shadow-sm mb-12 flex flex-col items-center transition-colors">
-
           <div className="w-full max-w-2xl mb-8">
             <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 transition-colors">YouTube Video URL</label>
             <input
               type="url"
               placeholder="https://www.youtube.com/watch?v=..."
               value={url}
-              onChange={(e) => {
-                setUrl(e.target.value);
-                setError(null);
-              }}
+              onChange={(e) => { setUrl(e.target.value); setError(null); }}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             />
           </div>
@@ -108,13 +198,13 @@ export default function YoutubeSummary() {
 
             <button
               onClick={handleSummarize}
-              disabled={isSummarizing || !url}
+              disabled={isLoading || !url}
               className="w-full sm:w-auto bg-red-600 text-white font-bold px-8 py-3 rounded-xl hover:bg-red-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-red-600/20"
             >
-              {isSummarizing ? (
+              {isLoading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Extracting...
+                  {statusMsg || "Processing..."}
                 </>
               ) : (
                 <>
@@ -125,13 +215,20 @@ export default function YoutubeSummary() {
             </button>
           </div>
 
+          {/* Status message */}
+          {isLoading && statusMsg && (
+            <div className="w-full max-w-2xl bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800 flex items-center gap-3 transition-colors">
+              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
+              <p className="text-sm font-bold text-blue-700 dark:text-blue-300">{statusMsg}</p>
+            </div>
+          )}
+
           {error && (
             <div className="w-full max-w-2xl bg-amber-50 dark:bg-amber-900/30 rounded-xl p-4 border border-amber-200 dark:border-amber-800 flex items-start gap-3 text-left transition-colors">
               <span className="material-symbols-outlined text-amber-500 flex-shrink-0">warning</span>
               <p className="text-sm font-bold text-amber-800 dark:text-amber-200 transition-colors">{error}</p>
             </div>
           )}
-
         </div>
 
         {summary && (
@@ -147,8 +244,6 @@ export default function YoutubeSummary() {
                 <ReactMarkdown>{summary}</ReactMarkdown>
               </article>
             </div>
-
-            {/* Chat Interface */}
             <ChatBox contextText={summary} sourceName="YouTube Video" language={language} />
           </div>
         )}
