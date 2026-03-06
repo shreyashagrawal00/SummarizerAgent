@@ -5,23 +5,6 @@ import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import ChatBox from "../components/ChatBox";
 
-// CORS proxy options — tried in order
-const CORS_PROXIES = [
-  (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-  (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  (url) => `https://cors-anywhere.herokuapp.com/${url}`,
-];
-
-async function fetchWithProxy(url) {
-  for (const proxy of CORS_PROXIES) {
-    try {
-      const res = await fetch(proxy(url), { signal: AbortSignal.timeout(10000) });
-      if (res.ok) return res;
-    } catch (_) {}
-  }
-  throw new Error("All CORS proxies failed. Please try again later.");
-}
-
 function extractVideoId(url) {
   try {
     const parsed = new URL(url);
@@ -36,65 +19,6 @@ function extractVideoId(url) {
   } catch (_) {}
   const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   return match ? match[1] : null;
-}
-
-// Extract captionTracks JSON using bracket-depth walker (handles nested JSON correctly)
-function extractCaptionTracksJson(html) {
-  const marker = '"captionTracks":';
-  const markerIdx = html.indexOf(marker);
-  if (markerIdx === -1) return null;
-  let i = markerIdx + marker.length;
-  while (i < html.length && html[i] !== "[") i++;
-  let depth = 0;
-  const jsonStart = i;
-  for (; i < html.length; i++) {
-    if (html[i] === "[" || html[i] === "{") depth++;
-    else if (html[i] === "]" || html[i] === "}") {
-      depth--;
-      if (depth === 0) break;
-    }
-  }
-  return html.slice(jsonStart, i + 1);
-}
-
-async function fetchTranscript(videoId) {
-  // Step 1: fetch YouTube page via CORS proxy
-  const pageRes = await fetchWithProxy(
-    `https://www.youtube.com/watch?v=${videoId}&hl=en`
-  );
-  const html = await pageRes.text();
-
-  // Step 2: extract caption tracks
-  const jsonStr = extractCaptionTracksJson(html);
-  if (!jsonStr) throw new Error("No captions found for this video");
-
-  const captionTracks = JSON.parse(jsonStr);
-  if (!captionTracks?.length) throw new Error("No caption tracks available");
-
-  // Step 3: pick best English track
-  const track =
-    captionTracks.find((t) => t.languageCode === "en" && !t.kind) ||
-    captionTracks.find((t) => t.languageCode === "en") ||
-    captionTracks.find((t) => t.languageCode?.startsWith("en")) ||
-    captionTracks[0];
-
-  if (!track?.baseUrl) throw new Error("No caption URL found");
-
-  // Step 4: download caption JSON via CORS proxy
-  const captionRes = await fetchWithProxy(track.baseUrl + "&fmt=json3");
-  const captionJson = await captionRes.json();
-  if (!captionJson?.events?.length) throw new Error("Caption data is empty");
-
-  // Step 5: convert to plain text
-  const text = captionJson.events
-    .filter((e) => e.segs)
-    .map((e) => e.segs.map((s) => s.utf8 || "").join(""))
-    .join(" ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if (!text) throw new Error("Could not extract text from captions");
-  return text;
 }
 
 export default function YoutubeSummary() {
@@ -128,15 +52,18 @@ export default function YoutubeSummary() {
 
     let transcript;
     try {
-      transcript = await fetchTranscript(videoId);
+      // Step 1: fetch transcript via our own backend (no CORS issues)
+      const res = await API.get(`/youtube/transcript?videoId=${videoId}`);
+      transcript = res.data.transcript;
     } catch (err) {
       setIsFetching(false);
       setStatusMsg("");
-      setError(
-        err.message?.includes("No captions") || err.message?.includes("No caption")
-          ? "This video does not have captions enabled. Please try a video with captions."
-          : `Could not fetch transcript: ${err.message}`
-      );
+      const msg = err.response?.data?.message;
+      if (err.response?.status === 429) {
+        setError("YouTube is rate limiting our server right now. Please try again in a few seconds.");
+      } else {
+        setError(msg || "Could not fetch transcript. Please try again.");
+      }
       return;
     }
 
@@ -145,6 +72,7 @@ export default function YoutubeSummary() {
     setStatusMsg("Generating AI summary...");
 
     try {
+      // Step 2: send transcript to AI summarizer
       const res = await API.post("/youtube/summarize", { transcript, language });
       setSummary(res.data.summary);
     } catch (err) {
