@@ -93,12 +93,57 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-primary rounded-2xl p-6 shadow-lg text-white">
-              <h3 className="font-bold text-lg mb-2">Daily Digest</h3>
-              <p className="text-sm text-white/80 mb-4">Your personalized summary of the world's most important news, curated just for you.</p>
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
-                <span className="material-symbols-outlined text-sm">auto_awesome</span>
+            <div className="bg-primary rounded-2xl p-5 shadow-lg text-white">
+              <h3 className="font-bold text-base mb-1.5">Daily Digest</h3>
+              <p className="text-xs text-white/80 mb-3">Your personalized summary of the world's most important news, curated just for you.</p>
+              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider">
+                <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
                 AI-Powered
+              </div>
+            </div>
+
+            {/* AI Toolkit Section */}
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 transition-colors">
+              <h3 className="font-display text-xl font-bold mb-4 dark:text-white transition-colors">AI Toolkit</h3>
+              <div className="space-y-3">
+                <button
+                  onClick={() => navigate("/youtube")}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-red-500/50 hover:bg-red-50 dark:hover:bg-red-950/20 text-slate-700 dark:text-slate-300 transition-all group text-left"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-500 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-xl">smart_display</span>
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-slate-900 dark:text-white">YouTube Summary</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Extract insights from videos</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => navigate("/web")}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-blue-500/50 hover:bg-blue-50 dark:hover:bg-blue-950/20 text-slate-700 dark:text-slate-300 transition-all group text-left"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-500 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-xl">language</span>
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-slate-900 dark:text-white">Webpage Summary</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Summarize long articles</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => navigate("/pdf")}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-purple-500/50 hover:bg-purple-50 dark:hover:bg-purple-950/20 text-slate-700 dark:text-slate-300 transition-all group text-left"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-500 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-xl">description</span>
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-slate-900 dark:text-white">PDF Summary</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Analyze long documents</p>
+                  </div>
+                </button>
               </div>
             </div>
           </aside>

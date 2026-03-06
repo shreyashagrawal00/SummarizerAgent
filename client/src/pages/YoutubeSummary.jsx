@@ -21,14 +21,21 @@ export default function YoutubeSummary() {
   }
 
   const handleSummarize = async () => {
-    if (!url) {
+    let finalUrl = url.trim();
+
+    if (!finalUrl) {
       setError("Please paste a valid YouTube URL.");
       return;
     }
 
-    if (!url.includes("youtube.com") && !url.includes("youtu.be")) {
-      setError("Please enter a valid YouTube link.");
-      return;
+    if (!finalUrl.includes("youtube.com") && !finalUrl.includes("youtu.be")) {
+      // If it looks like a raw 11-character video ID, convert it
+      if (/^[a-zA-Z0-9_-]{11}$/.test(finalUrl)) {
+        finalUrl = `https://www.youtube.com/watch?v=${finalUrl}`;
+      } else {
+        setError("Please enter a valid YouTube link or video ID.");
+        return;
+      }
     }
 
     setIsSummarizing(true);
@@ -36,7 +43,7 @@ export default function YoutubeSummary() {
     setSummary(null);
 
     try {
-      const res = await API.post("/youtube/summarize", { url, language });
+      const res = await API.post("/youtube/summarize", { url: finalUrl, language });
       setSummary(res.data.summary);
     } catch (err) {
       console.error("YouTube Summary Error:", err);
