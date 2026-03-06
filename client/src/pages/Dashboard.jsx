@@ -30,7 +30,6 @@ export default function Dashboard() {
       const usableHeight = pageHeight - 20;
       let srcY = 0;
       while (srcY < imgHeight) {
-        const sliceH = Math.min(imgHeight - srcY, usableHeight);
         pdf.addImage(imgData, "JPEG", 10, 10 - srcY, imgWidth, imgHeight);
         srcY += usableHeight;
         if (srcY < imgHeight) pdf.addPage();
