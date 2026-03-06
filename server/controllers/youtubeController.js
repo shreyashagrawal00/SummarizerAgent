@@ -31,6 +31,29 @@ const eventsToText = (events) => {
   return text || null;
 };
 
+// ─── Retry helper: wait N ms ──────────────────────────────────────────────────
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// ─── Axios fetch with 429 retry ───────────────────────────────────────────────
+// On 429, waits 3s and retries once before giving up
+const fetchWithRetry = async (url, options = {}, retries = 2) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await axios.get(url, options);
+      return res;
+    } catch (err) {
+      const status = err.response?.status;
+      if (status === 429 && i < retries - 1) {
+        const wait = 3000 * (i + 1); // 3s, 6s
+        console.warn(`429 rate limited — waiting ${wait}ms before retry ${i + 1}...`);
+        await sleep(wait);
+        continue;
+      }
+      throw err;
+    }
+  }
+};
+
 // ─── Innertube singleton ──────────────────────────────────────────────────────
 let innertubeInstance = null;
 const getInnertube = async () => {
@@ -43,103 +66,88 @@ const getInnertube = async () => {
   return innertubeInstance;
 };
 
-// ─── Method 1: Innertube — extract caption track URLs from player response ────
-// getTranscript() returns 400 for auto-captions. Instead we read the caption
-// tracks directly from the video info (player_response) and download them.
+// ─── Method 1: Innertube — reads caption_tracks from player response ──────────
+// The base_url from caption_tracks points to googlevideo.com CDN (not youtube.com)
+// so it bypasses the IP-based rate limiting that hits methods 2 and 3.
 const extractWithInnertube = async (videoId) => {
   try {
     console.log("YouTube [1/3]: trying Innertube player captions...");
     const yt = await getInnertube();
     const info = await yt.getInfo(videoId);
 
-    // The captions object lives at info.captions
     const captionTracks = info?.captions?.caption_tracks;
 
-    if (!captionTracks?.length) {
-      console.warn("YouTube [1/3]: no caption_tracks in player response");
-      // Try getTranscript anyway as fallback within this method
-      try {
-        const transcriptData = await info.getTranscript();
-        const segments =
-          transcriptData?.transcript?.content?.body?.initial_segments ||
-          transcriptData?.transcript?.content?.body?.content ||
-          [];
-        if (segments.length > 0) {
-          const text = segments
-            .map((seg) =>
-              seg?.snippet?.text ||
-              seg?.transcriptSegmentRenderer?.snippet?.runs?.[0]?.text ||
-              seg?.text || ""
-            )
-            .filter(Boolean)
-            .join(" ")
-            .replace(/\s+/g, " ")
-            .trim();
-          if (text) {
-            console.log(`YouTube [1/3]: getTranscript success — ${text.length} chars`);
-            return text;
-          }
+    if (captionTracks?.length) {
+      console.log(`YouTube [1/3]: found ${captionTracks.length} caption tracks`);
+
+      // Prefer manual English > auto English > any English > first available
+      const track =
+        captionTracks.find((t) => t.language_code === "en" && t.kind !== "asr") ||
+        captionTracks.find((t) => t.language_code === "en") ||
+        captionTracks.find((t) => t.language_code?.startsWith("en")) ||
+        captionTracks[0];
+
+      console.log(`YouTube [1/3]: using lang=${track.language_code} kind=${track.kind || "manual"} url=${track.base_url?.substring(0, 60)}...`);
+
+      if (track?.base_url) {
+        // This URL goes to googlevideo.com CDN — not rate limited like youtube.com
+        const res = await fetchWithRetry(track.base_url + "&fmt=json3", { timeout: 12000 });
+        const text = eventsToText(res.data?.events);
+        if (text) {
+          console.log(`YouTube [1/3]: caption download success — ${text.length} chars`);
+          return text;
         }
-      } catch (transcriptErr) {
-        console.warn("YouTube [1/3]: getTranscript also failed:", transcriptErr.message);
       }
-      return null;
     }
 
-    console.log(`YouTube [1/3]: found ${captionTracks.length} caption tracks`);
-
-    // Prefer: manual English > auto English > any English > first available
-    const track =
-      captionTracks.find((t) => t.language_code === "en" && t.kind !== "asr") ||
-      captionTracks.find((t) => t.language_code === "en") ||
-      captionTracks.find((t) => t.language_code?.startsWith("en")) ||
-      captionTracks[0];
-
-    console.log(`YouTube [1/3]: using track lang=${track.language_code} kind=${track.kind || "manual"}`);
-
-    // base_url comes from Innertube's internal session — authenticated, not IP-blocked
-    const baseUrl = track.base_url;
-    if (!baseUrl) return null;
-
-    const res = await axios.get(baseUrl + "&fmt=json3", { timeout: 12000 });
-    const text = eventsToText(res.data?.events);
-
-    if (text) {
-      console.log(`YouTube [1/3]: caption download success — ${text.length} chars`);
-      return text;
+    // Fallback within method: try getTranscript() for manually-captioned videos
+    console.log("YouTube [1/3]: trying getTranscript()...");
+    try {
+      const transcriptData = await info.getTranscript();
+      const segments =
+        transcriptData?.transcript?.content?.body?.initial_segments ||
+        transcriptData?.transcript?.content?.body?.content ||
+        [];
+      if (segments.length > 0) {
+        const text = segments
+          .map((seg) =>
+            seg?.snippet?.text ||
+            seg?.transcriptSegmentRenderer?.snippet?.runs?.[0]?.text ||
+            seg?.text || ""
+          )
+          .filter(Boolean)
+          .join(" ")
+          .replace(/\s+/g, " ")
+          .trim();
+        if (text) {
+          console.log(`YouTube [1/3]: getTranscript success — ${text.length} chars`);
+          return text;
+        }
+      }
+    } catch (e) {
+      console.warn("YouTube [1/3]: getTranscript failed:", e.message);
     }
 
+    console.warn("YouTube [1/3]: no transcript found via Innertube");
     return null;
   } catch (err) {
     console.warn("YouTube [1/3] Innertube failed:", err.message);
-    innertubeInstance = null; // reset on failure
+    innertubeInstance = null; // reset bad session
     return null;
   }
 };
 
-// ─── Method 2: YouTube Data API v3 + timedtext ────────────────────────────────
+// ─── Method 2: timedtext with API key ────────────────────────────────────────
 const extractWithYouTubeAPI = async (videoId) => {
   const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
-  if (!YOUTUBE_API_KEY) {
-    console.warn("YouTube [2/3]: YOUTUBE_API_KEY not set, skipping.");
-    return null;
-  }
+  if (!YOUTUBE_API_KEY) return null;
+
   try {
-    console.log("YouTube [2/3]: trying YouTube Data API v3...");
-
-    const videoRes = await axios.get("https://www.googleapis.com/youtube/v3/videos", {
-      params: { part: "contentDetails,snippet", id: videoId, key: YOUTUBE_API_KEY },
-      timeout: 10000,
-    });
-    const item = videoRes.data?.items?.[0];
-    if (!item) return null;
-    console.log(`YouTube [2/3]: caption=${item.contentDetails?.caption}, lang=${item.snippet?.defaultAudioLanguage}`);
-
-    // Try timedtext with known langs + key
-    const langs = ["en", "en-US", "en-GB", "a.en", item.snippet?.defaultAudioLanguage].filter(Boolean);
-    for (const lang of [...new Set(langs)]) {
+    console.log("YouTube [2/3]: trying timedtext with API key...");
+    const langs = ["en", "en-US", "en-GB", "a.en"];
+    for (const lang of langs) {
       try {
-        const res = await axios.get(
+        const res = await fetchWithRetry(
           `https://www.youtube.com/api/timedtext?v=${videoId}&lang=${lang}&fmt=json3&key=${YOUTUBE_API_KEY}`,
           { timeout: 10000 }
         );
@@ -150,35 +158,9 @@ const extractWithYouTubeAPI = async (videoId) => {
         }
       } catch (_) {}
     }
-
-    // Discover langs via list
-    try {
-      const listRes = await axios.get(
-        `https://www.youtube.com/api/timedtext?v=${videoId}&type=list&key=${YOUTUBE_API_KEY}`,
-        { timeout: 8000 }
-      );
-      if (typeof listRes.data === "string" && listRes.data.includes("lang_code")) {
-        const langMatches = [...listRes.data.matchAll(/lang_code="([^"]+)"/g)];
-        console.log(`YouTube [2/3]: discovered langs: ${langMatches.map(m => m[1]).join(", ")}`);
-        for (const [, langCode] of langMatches) {
-          try {
-            const res = await axios.get(
-              `https://www.youtube.com/api/timedtext?v=${videoId}&lang=${langCode}&fmt=json3&key=${YOUTUBE_API_KEY}`,
-              { timeout: 8000 }
-            );
-            const text = eventsToText(res.data?.events);
-            if (text) {
-              console.log(`YouTube [2/3]: list lang=${langCode} success — ${text.length} chars`);
-              return text;
-            }
-          } catch (_) {}
-        }
-      }
-    } catch (_) {}
-
     return null;
   } catch (err) {
-    console.warn("YouTube [2/3] failed:", err.response?.data?.error?.message || err.message);
+    console.warn("YouTube [2/3] failed:", err.message);
     return null;
   }
 };
@@ -211,7 +193,7 @@ const extractWithHtmlScraping = async (videoId) => {
       "Accept-Language": "en-US,en;q=0.9",
       Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     };
-    const { data: html } = await axios.get(
+    const { data: html } = await fetchWithRetry(
       `https://www.youtube.com/watch?v=${videoId}&hl=en`,
       { headers, timeout: 15000 }
     );
@@ -225,7 +207,7 @@ const extractWithHtmlScraping = async (videoId) => {
       captionTracks.find((t) => t.languageCode?.startsWith("en")) ||
       captionTracks[0];
     if (!track?.baseUrl) return null;
-    const { data: json } = await axios.get(track.baseUrl + "&fmt=json3", { headers, timeout: 10000 });
+    const { data: json } = await fetchWithRetry(track.baseUrl + "&fmt=json3", { headers, timeout: 10000 });
     const text = eventsToText(json?.events);
     if (text) console.log(`YouTube [3/3]: HTML success — ${text.length} chars`);
     return text;
@@ -258,7 +240,7 @@ export const summarizeYoutube = async (req, res) => {
     if (!fullText) {
       return res.status(404).json({
         message:
-          "Could not fetch transcript for this video. The video may not have captions, or they may be disabled.",
+          "Could not fetch transcript. YouTube is rate limiting this server. Please try again in a few seconds.",
       });
     }
 
