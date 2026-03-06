@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://summarizeragent.onrender.com/api",
+  baseURL:
+    import.meta.env.VITE_API_URL || "https://summarizeragent.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -19,9 +20,15 @@ API.interceptors.response.use(
   (res) => res,
   async (error) => {
     const originalRequest = error.config;
-    const isAuthRoute = originalRequest.url.includes("/auth/login") || originalRequest.url.includes("/auth/refresh");
+    const isAuthRoute =
+      originalRequest.url.includes("/auth/login") ||
+      originalRequest.url.includes("/auth/refresh");
 
-    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isAuthRoute
+    ) {
       originalRequest._retry = true;
       const refreshToken = localStorage.getItem("refreshToken");
 
@@ -31,7 +38,10 @@ API.interceptors.response.use(
       }
 
       try {
-        const res = await axios.post(`${API.defaults.baseURL}/auth/refresh`, { refreshToken });
+        const res = await axios.post(
+          `${API.defaults.baseURL}/auth/refresh`,
+          { refreshToken }
+        );
         localStorage.setItem("accessToken", res.data.accessToken);
         originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
         return API(originalRequest);

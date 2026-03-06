@@ -17,7 +17,7 @@ app.set("trust proxy", 1);
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 1000 // Increased for development
+  max: 1000
 });
 
 app.use(limiter);
@@ -29,7 +29,41 @@ app.use((req, res, next) => {
 
 app.use(helmet());
 
-app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173", credentials: true }));
+// ─── CORS: allow CLIENT_URL env var + common Vercel patterns + localhost ──────
+const getAllowedOrigins = () => {
+  const origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+  ];
+
+  if (process.env.CLIENT_URL) {
+    origins.push(process.env.CLIENT_URL);
+  }
+
+  return origins;
+};
+
+app.use(cors({
+  origin: (origin, callback) => {
+    const allowed = getAllowedOrigins();
+
+    // Allow requests with no origin (mobile apps, Postman, server-to-server)
+    if (!origin) return callback(null, true);
+
+    // Allow any vercel.app subdomain
+    if (origin.endsWith(".vercel.app")) return callback(null, true);
+
+    // Allow any onrender.com subdomain
+    if (origin.endsWith(".onrender.com")) return callback(null, true);
+
+    if (allowed.includes(origin)) return callback(null, true);
+
+    console.warn(`CORS blocked origin: ${origin}`);
+    callback(new Error(`CORS: origin ${origin} not allowed`));
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(passport.initialize());
 
