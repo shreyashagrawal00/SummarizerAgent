@@ -18,9 +18,6 @@ export const ThemeProvider = ({ children }) => {
       if (savedTheme) {
         return savedTheme;
       }
-      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        return "dark";
-      }
     }
     return "light";
   });
