@@ -4,6 +4,10 @@ import { useAuth } from "../context/useAuth";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import ChatBox from "../components/ChatBox";
+import { downloadSummaryAsPdf } from "../utils/downloadPdf";
+import { INDIAN_LANGUAGES } from "../utils/languages";
+
+
 
 export default function WebSummary() {
   const [url, setUrl] = useState("");
@@ -11,6 +15,8 @@ export default function WebSummary() {
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [summary, setSummary] = useState(null);
   const [error, setError] = useState(null);
+  const [downloading, setDownloading] = useState(false);
+
 
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -44,6 +50,23 @@ export default function WebSummary() {
       setIsSummarizing(false);
     }
   };
+
+  const handleDownloadPDF = () => {
+    if (!summary) return;
+    setDownloading(true);
+    try {
+      downloadSummaryAsPdf(
+        summary,
+        "Webpage Summary",
+        `Web-Summary-${new Date().toISOString().split("T")[0]}.pdf`
+      );
+    } catch (err) {
+      console.error("PDF download error:", err);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
 
   return (
     <div className="min-h-[calc(100vh-80px)] bg-background-light dark:bg-slate-950 transition-colors duration-200">
@@ -84,13 +107,11 @@ export default function WebSummary() {
                 onChange={(e) => setLanguage(e.target.value)}
                 className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm rounded-xl focus:ring-primary focus:border-primary block w-full p-2.5 outline-none font-bold transition-colors"
               >
-                <option value="en">English (default)</option>
-                <option value="es">Spanish</option>
-                <option value="fr">French</option>
-                <option value="de">German</option>
-                <option value="hi">Hindi</option>
-                <option value="zh">Chinese</option>
-                <option value="ja">Japanese</option>
+                {INDIAN_LANGUAGES.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.label} {lang.code === "en" ? "(default)" : ""}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -129,6 +150,18 @@ export default function WebSummary() {
                 <span className="material-symbols-outlined text-green-500">check_circle</span>
                 <h2 className="font-display text-xl font-bold text-slate-900 dark:text-white transition-colors">Summary Generated</h2>
               </div>
+              <button
+                onClick={handleDownloadPDF}
+                disabled={downloading}
+                className="flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50"
+              >
+                {downloading ? (
+                  <div className="animate-spin h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full"></div>
+                ) : (
+                  <span className="material-symbols-outlined text-sm">download</span>
+                )}
+                Download PDF
+              </button>
             </div>
             <div className="p-8 sm:p-12">
               <article className="prose prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 text-lg leading-relaxed font-sans transition-colors">

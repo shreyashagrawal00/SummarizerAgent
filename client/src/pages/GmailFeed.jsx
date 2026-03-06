@@ -3,6 +3,8 @@ import API from "../api/api";
 import { useAuth } from "../context/useAuth";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
+import { downloadSummaryAsPdf } from "../utils/downloadPdf";
+
 
 export default function GmailFeed() {
   const [emails, setEmails] = useState([]);
@@ -11,6 +13,8 @@ export default function GmailFeed() {
   const [activeSummary, setActiveSummary] = useState(null);
   const [error, setError] = useState(null);
   const [connectError, setConnectError] = useState(null);
+  const [downloading, setDownloading] = useState(false);
+
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -55,6 +59,24 @@ export default function GmailFeed() {
       setSummarizingId(null);
     }
   };
+
+  const handleDownloadPDF = () => {
+    if (!activeSummary) return;
+    setDownloading(true);
+    try {
+      const title = `Summary: ${activeSummary.title}`;
+      downloadSummaryAsPdf(
+        activeSummary.content,
+        title,
+        `Gmail-Summary-${new Date().toISOString().split("T")[0]}.pdf`
+      );
+    } catch (err) {
+      console.error("PDF download error:", err);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
 
   if (!isAuthenticated) return null;
 
@@ -171,12 +193,28 @@ export default function GmailFeed() {
                   {error ? "Summarization Error" : activeSummary?.title}
                 </h2>
               </div>
-              <button
-                onClick={() => { setActiveSummary(null); setError(null); }}
-                className="w-10 h-10 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
-              >
-                <span className="material-symbols-outlined text-xl">close</span>
-              </button>
+              <div className="flex items-center gap-3">
+                {!error && activeSummary && (
+                  <button
+                    onClick={handleDownloadPDF}
+                    disabled={downloading}
+                    className="flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50"
+                  >
+                    {downloading ? (
+                      <div className="animate-spin h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full"></div>
+                    ) : (
+                      <span className="material-symbols-outlined text-sm">download</span>
+                    )}
+                    Download PDF
+                  </button>
+                )}
+                <button
+                  onClick={() => { setActiveSummary(null); setError(null); }}
+                  className="w-10 h-10 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-xl">close</span>
+                </button>
+              </div>
             </div>
             <div className="p-8 md:p-12 max-h-[60vh] overflow-y-auto">
               {error === "QUOTA_ERROR" ? (

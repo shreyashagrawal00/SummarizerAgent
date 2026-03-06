@@ -4,6 +4,10 @@ import { useAuth } from "../context/useAuth";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import ChatBox from "../components/ChatBox";
+import { downloadSummaryAsPdf } from "../utils/downloadPdf";
+import { INDIAN_LANGUAGES } from "../utils/languages";
+
+
 
 function extractVideoId(url) {
   try {
@@ -16,7 +20,7 @@ function extractVideoId(url) {
       const id = parsed.pathname.slice(1).split("?")[0];
       if (id && id.length === 11) return id;
     }
-  } catch (_) {}
+  } catch (_) { }
   const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   return match ? match[1] : null;
 }
@@ -29,6 +33,8 @@ export default function YoutubeSummary() {
   const [summary, setSummary] = useState(null);
   const [error, setError] = useState(null);
   const [statusMsg, setStatusMsg] = useState("");
+  const [downloading, setDownloading] = useState(false);
+
 
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -87,6 +93,23 @@ export default function YoutubeSummary() {
     }
   };
 
+  const handleDownloadPDF = () => {
+    if (!summary) return;
+    setDownloading(true);
+    try {
+      downloadSummaryAsPdf(
+        summary,
+        "YouTube Video Summary",
+        `YouTube-Summary-${new Date().toISOString().split("T")[0]}.pdf`
+      );
+    } catch (err) {
+      console.error("PDF download error:", err);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+
   const isLoading = isFetching || isSummarizing;
 
   return (
@@ -120,13 +143,11 @@ export default function YoutubeSummary() {
                 onChange={(e) => setLanguage(e.target.value)}
                 className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm rounded-xl focus:ring-primary focus:border-primary block w-full p-2.5 outline-none font-bold transition-colors"
               >
-                <option value="en">English (default)</option>
-                <option value="es">Spanish</option>
-                <option value="fr">French</option>
-                <option value="de">German</option>
-                <option value="hi">Hindi</option>
-                <option value="zh">Chinese</option>
-                <option value="ja">Japanese</option>
+                {INDIAN_LANGUAGES.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.label} {lang.code === "en" ? "(default)" : ""}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -166,9 +187,23 @@ export default function YoutubeSummary() {
 
         {summary && (
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-500 transition-colors">
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3 bg-slate-50/50 dark:bg-slate-800/50">
-              <span className="material-symbols-outlined text-green-500">check_circle</span>
-              <h2 className="font-display text-xl font-bold text-slate-900 dark:text-white">Summary Generated</h2>
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-green-500">check_circle</span>
+                <h2 className="font-display text-xl font-bold text-slate-900 dark:text-white">Summary Generated</h2>
+              </div>
+              <button
+                onClick={handleDownloadPDF}
+                disabled={downloading}
+                className="flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50"
+              >
+                {downloading ? (
+                  <div className="animate-spin h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full"></div>
+                ) : (
+                  <span className="material-symbols-outlined text-sm">download</span>
+                )}
+                Download PDF
+              </button>
             </div>
             <div className="p-8 sm:p-12">
               <article className="prose prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 text-lg leading-relaxed font-sans">
