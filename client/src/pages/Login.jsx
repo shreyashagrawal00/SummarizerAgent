@@ -121,7 +121,7 @@ export default function Login() {
 
               <button
                 type="button"
-                onClick={() => window.location.href = "http://localhost:5001/api/auth/google"}
+                onClick={() => window.location.href = `${import.meta.env.VITE_API_URL || "http://localhost:5001/api"}/auth/google`}
                 className="mt-6 w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all font-semibold text-slate-700 dark:text-slate-300 shadow-sm"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">

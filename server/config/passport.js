@@ -8,7 +8,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: process.env.GOOGLE_CALLBACK_URL || "http://localhost:5001/api/auth/google/callback",
+        callbackURL: process.env.GOOGLE_CALLBACK_URL || (process.env.NODE_ENV === "production" ? "https://summarizeragent.onrender.com/api/auth/google/callback" : "http://localhost:5001/api/auth/google/callback"),
         accessType: "offline",
         prompt: "consent",
         scope: ["profile", "email", "https://www.googleapis.com/auth/gmail.readonly"]

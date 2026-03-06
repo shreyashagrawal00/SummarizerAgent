@@ -85,7 +85,7 @@ export default function GmailFeed() {
                   "Something went wrong fetching your emails. Try signing in with Google again."}
             </p>
             <button
-              onClick={() => window.location.href = "http://localhost:5001/api/auth/google"}
+              onClick={() => window.location.href = `${API.defaults.baseURL || import.meta.env.VITE_API_URL || "http://localhost:5001/api"}/auth/google`}
               className="bg-primary text-white text-sm font-bold px-8 py-3 rounded-xl hover:brightness-110 transition-all shadow-md"
             >
               {connectError === "gmail_not_connected" ? "Connect Gmail via Google" : "Re-connect Google Account"}

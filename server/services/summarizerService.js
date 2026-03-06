@@ -41,10 +41,10 @@ export const askQuestion = async (contextText, question, language = "en", histor
   const historyStr =
     history?.length > 0
       ? "Conversation History:\n" +
-        history
-          .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
-          .join("\n") +
-        "\n\n"
+      history
+        .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
+        .join("\n") +
+      "\n\n"
       : "";
   return summarizeText(
     `Use the following document and conversation history to answer the user's question. If the answer is not in the document, say so politely.\n\nDocument:\n${contextText}\n\n${historyStr}Question:\n${question}${langInstruction(language)}`
@@ -132,7 +132,7 @@ const summarizeWithOpenRouter = async (prompt) => {
           headers: {
             Authorization: `Bearer ${OPENROUTER_API_KEY}`,
             "Content-Type": "application/json",
-            "HTTP-Referer": "http://localhost:5001",
+            "HTTP-Referer": process.env.API_URL || "https://summarizeragent.onrender.com",
             "X-Title": "SummarizerAgent",
           },
           timeout: 25000,
