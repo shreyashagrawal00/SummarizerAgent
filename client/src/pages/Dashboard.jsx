@@ -9,8 +9,7 @@ import html2canvas from "html2canvas";
 export default function Dashboard() {
   const [summary, setSummary] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState(null);
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
 
   const [downloading, setDownloading] = useState(false);
@@ -46,11 +45,6 @@ export default function Dashboard() {
     if (isAuthenticated) {
       setIsLoading(true);
 
-      // Fetch user profile
-      API.get("/auth/me")
-        .then(res => setUser(res.data))
-        .catch(err => console.error("Failed to fetch user profile", err));
-
       API.get("/news/summary")
         .then(res => setSummary(res.data.summary))
         .catch(err => {
@@ -76,8 +70,14 @@ export default function Dashboard() {
             <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 transition-colors">
               <h3 className="font-display text-xl font-bold mb-4 dark:text-white transition-colors">Your Account</h3>
               <div className="space-y-4">
-                <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
-                  {user?.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U"}
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/10 border border-primary/20 flex items-center justify-center">
+                  {user?.profilePicture ? (
+                    <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="material-symbols-outlined text-2xl text-primary">
+                      {user?.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "person"}
+                    </span>
+                  )}
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-900 dark:text-white transition-colors">{user?.name || "User"}</p>

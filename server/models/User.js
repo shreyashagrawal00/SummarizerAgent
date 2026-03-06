@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema({
   googleId: String,
   googleAccessToken: String,
   googleRefreshToken: String,
-  refreshToken: String
+  refreshToken: String,
+  profilePicture: String
 
 });
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AuthContext } from "./AuthContextInstance";
+import API from "../api/api";
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -16,6 +17,7 @@ export const AuthProvider = ({ children }) => {
 
     return hasLocalToken;
   });
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     // Clean up the URL securely
@@ -25,6 +27,25 @@ export const AuthProvider = ({ children }) => {
       window.history.replaceState({}, document.title, newUrl);
     }
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const fetchUser = async () => {
+        try {
+          const res = await API.get("/auth/me");
+          setUser(res.data);
+        } catch (err) {
+          console.error("Failed to fetch user profile", err);
+          if (err.response?.status === 401) {
+            logout();
+          }
+        }
+      };
+      fetchUser();
+    } else {
+      setUser(null);
+    }
+  }, [isAuthenticated]);
 
   const login = (accessToken, refreshToken) => {
     localStorage.setItem("accessToken", accessToken);
@@ -39,7 +60,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -5,7 +5,7 @@ import { useState } from "react";
 
 const Header = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [logoError, setLogoError] = useState(false);
@@ -77,9 +77,16 @@ const Header = () => {
           {isAuthenticated ? (
             <button
               onClick={() => navigate("/dashboard")}
-              className="bg-primary text-white text-base font-bold px-8 py-3 rounded-xl hover:brightness-110 transition-all shadow-md hidden sm:block"
+              className="flex items-center gap-3 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl transition-all border border-slate-700 shadow-sm group"
             >
-              Dashboard
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-primary/20 border border-primary/30 flex items-center justify-center">
+                {user?.profilePicture ? (
+                  <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="material-symbols-outlined text-primary text-sm">person</span>
+                )}
+              </div>
+              <span className="text-sm font-bold hidden sm:block">Dashboard</span>
             </button>
           ) : (
             <>

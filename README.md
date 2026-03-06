@@ -1,113 +1,105 @@
-# SummarizerAgent 🚀
+# Briefly (SummarizerAgent) 🚀
 
-**SummarizerAgent** is an intelligent, AI-powered web application designed to help you process information faster. It connects to your daily workflows (documents, news, and emails) and uses advanced language models to generate concise, readable summaries.
+**Briefly** is a high-performance, AI-driven information processing hub designed to eliminate content overload. It transforms long-form content—from YouTube videos and PDFs to news feeds and emails—into actionable, high-quality summaries in seconds.
 
----
-
-## 🌟 Key Features
-
-*   **PDF Summarization:** Upload long PDF documents and instantly receive a structured summary using advanced AI models. Download the generated summary back to PDF.
-*   **Gmail Integration:** Securely connect your Google Account to view and summarize your recent inbox emails. Never miss an important detail in long email threads.
-*   **Global Intel Feed:** Stay updated with real-time global news (powered by NewsData.io). Pick any article and let the AI generate a quick digest so you don't have to read the whole piece.
-*   **Secure Authentication:** End-to-end secure login using Google OAuth 2.0 and JWT (JSON Web Tokens).
-*   **Modern, Responsive UI:** A beautiful, intuitive, and mobile-friendly interface built with React and styled with Tailwind CSS.
+Built with a "Premium-First" philosophy, Briefly combines a sleek, responsive interface with powerful AI models to help you stay informed without the fatigue.
 
 ---
 
-## 🛠️ Tech Stack & Technologies Used
+## ✨ Features that Empower You
 
-This project follows a modern **MERN-style** architecture (MongoDB, Express, React, Node.js) with several third-party integrations.
+### 📺 YouTube Video Intelligence
+No more scrubbing through hour-long videos. Drop a link and get a structured, point-by-point summary of the key takeaways, saving you hours of playback time.
+
+### 📄 Deep PDF Analysis & Chat
+Upload technical papers, reports, or books. Briefly doesn't just summarize; it lets you **Chat with your Document**. Ask questions, extract specific data points, and download your AI-generated insights back to PDF.
+
+### 🌐 Webpage Distillation
+Found a long-read article or a complex blog post? Paste the URL and get a clean, distilled version of the main arguments and conclusions instantly.
+
+### 📧 Gmail Inbox Digest
+Connect your Google account to scan your recent emails. Get a unified summary of your latest conversations so you know exactly what needs your attention before you even open your inbox.
+
+### 📰 Live Global Intel Feed
+Stay ahead of the curve with a real-time news engine. Browse global headlines and selectively summarize the stories that matter to you.
+
+### 🔐 Secure & Seamless
+- **Enterprise-Grade Auth:** Secure login via Google OAuth 2.0 or traditional JWT-based accounts.
+- **Smart Theme:** Intelligent Dark/Light mode switching (now defaulting to Light for a clean start).
+- **Responsive by Design:** Fully optimized for mobile, tablet, and desktop workflows.
+
+---
+
+## 🛠️ The Technology Behind Briefly
+
+Briefly is built on a modern **MERN+AI** stack, engineered for scalability and speed.
 
 ### Frontend
-*   **Framework:** [React 19](https://react.dev/) built with [Vite](https://vitejs.dev/)
-*   **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
-*   **Routing:** [React Router v7](https://reactrouter.com/)
-*   **Data Fetching:** [Axios](https://axios-http.com/)
-*   **Markdown Rendering:** `react-markdown` (for rendering structured AI output)
-*   **PDF Generation:** `jsPDF` & `html2canvas` (for exporting summaries)
+- **Framework:** React 19 + Vite (for lightning-fast builds)
+- **Styling:** Tailwind CSS v4 (Modern, utility-first design)
+- **State & Routing:** React Router v7 & Context API
+- **Utilities:** Axios (API), jsPDF (Exports), react-markdown (Rendering)
 
 ### Backend
-*   **Runtime:** [Node.js](https://nodejs.org/)
-*   **Framework:** [Express.js](https://expressjs.com/)
-*   **Database:** [MongoDB](https://www.mongodb.com/) via [Mongoose](https://mongoosejs.com/)
-*   **Authentication:** 
-    *   [Passport.js](http://www.passportjs.org/) (Google OAuth 2.0)
-    *   [JSON Web Tokens (JWT)](https://jwt.io/)
-*   **File Uploads:** `multer` (for handling PDF uploads to memory)
-*   **PDF Parsing:** `pdf-parse` (for extracting text from uploaded PDFs)
-*   **Security & Optimization:** `helmet` (HTTP headers), `cors`, `express-rate-limit`
+- **Runtime:** Node.js & Express.js
+- **Database:** MongoDB Atlas (Cloud-native data)
+- **Security:** Helmet, CORS (configured for Vercel/Render), Express Rate Limit
+- **Auth:** Passport.js (Google Strategy) & JWT
 
-### Third-Party APIs & AI Services
-*   **Google APIs:** Google Identity (OAuth) and Gmail API (Read-only access)
-*   **LLM Provider:** [OpenRouter](https://openrouter.ai/) (Utilizing models like `mistralai/mistral-7b-instruct:free`) & Google Gemini API.
-*   **News API:** [NewsData.io](https://newsdata.io/) (for fetching live global news articles)
+### AI & Integrations
+- **LLM Orchestration:** OpenRouter (Mistral/Free models) & Google Gemini API
+- **Data Sources:** NewsData.io (Live News), Supadata (Web/YouTube Scraping)
 
 ---
 
-## 🚀 Getting Started (Local Development)
+## 🚀 Speed Run: Setting Up Locally
 
-To run this project locally, follow these steps:
+Get your own instance of Briefly up and running in minutes.
 
-### Prerequisites
-*   Node.js (v18+ recommended)
-*   A local MongoDB instance or a free MongoDB Atlas Cloud cluster
-*   API Keys for Google Cloud (OAuth), OpenRouter (or Gemini), and NewsData.io
+### 1. Prerequisites
+- Node.js (v18+)
+- MongoDB (Local or Atlas)
+- API Keys: Google Cloud (OAuth), OpenRouter/Gemini, NewsData, Supadata.
 
-### 1. Clone the repository
-```bash
-git clone https://github.com/yourusername/SummarizerAgent.git
-cd SummarizerAgent
-```
-
-### 2. Set up the Backend
-```bash
-cd server
-npm install
-```
-Create a `.env` file in the `server` directory and add the following variables:
+### 2. Environment Configuration
+Create a `.env` file in the `/server` directory:
 ```env
 PORT=5001
-MONGO_URI=mongodb://localhost:27017/summarizer_agent
-
-# Authentication Secrets
-JWT_SECRET=your_super_secret_jwt_string
-REFRESH_SECRET=your_super_secret_refresh_string
-
-# Google OAuth Credentials
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_CALLBACK_URL=http://localhost:5001/api/auth/google/callback
-CLIENT_URL=http://localhost:5173
-
-# API Keys
-NEWS_API_KEY=your_newsdata_api_key
-OPENROUTER_API_KEY=your_openrouter_api_key
-# GEMINI_API_KEY=your_gemini_api_key (Optional)
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+REFRESH_SECRET=your_refresh_token_secret
+GOOGLE_CLIENT_ID=your_google_id
+GOOGLE_CLIENT_SECRET=your_google_secret
+OPENROUTER_API_KEY=your_key
+NEWS_API_KEY=your_key
+YOUTUBE_API_KEY=your_key
+SUPADATA_API_KEY=your_key
 ```
-Start the backend server:
+
+### 3. Ignition
+From the root directory:
+
+**Backend:**
 ```bash
-npm run dev
+cd server && npm install && npm run dev
 ```
 
-### 3. Set up the Frontend (in a new terminal)
+**Frontend:**
 ```bash
-cd ../client
-npm install
-```
-Start the frontend development server:
-```bash
-npm run dev
+cd client && npm install && npm run dev
 ```
 
-The application should now be running! The frontend will be available at `http://localhost:5173` and it will automatically talk to the backend at `http://localhost:5001`.
+Visit `http://localhost:5173` and start condensing the world!
 
 ---
 
-## 🌐 Deployment Overview
+## 🌍 Deployment
 
-The application is configured to be easily deployed to modern cloud providers:
-*   **Frontend:** Designed for deployment on [Vercel](https://vercel.com/) or Netlify.
-*   **Backend:** Designed for deployment on [Render.com](https://render.com/), Heroku, or DigitalOcean Apps.
-*   **Database:** Utilizing [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) for a live cloud database.
+Briefly is pre-configured for the modern cloud:
+- **Client:** Optimized for [Vercel](https://vercel.com)
+- **Server:** Ready for [Render](https://render.com) or Heroku
+- **Database:** Fully compatible with [MongoDB Atlas](https://mongodb.com/atlas)
 
-*(Remember to update the `CLIENT_URL` on the backend, the `VITE_API_URL` on the frontend, and the Authorized URIs in the Google Cloud Console when moving to production!)*
+---
+
+Developed with ❤️ by [Your Name/GitHub Handle]
