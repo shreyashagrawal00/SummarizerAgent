@@ -2,6 +2,8 @@ import { useState } from "react";
 import API from "../api/api";
 import ReactMarkdown from "react-markdown";
 import ChatBox from "../components/ChatBox";
+import SummaryActions from "../components/SummaryActions";
+import SkeletonLoader from "../components/SkeletonLoader";
 import { downloadSummaryAsPdf } from "../utils/downloadPdf";
 import { INDIAN_LANGUAGES } from "../utils/languages";
 
@@ -177,6 +179,19 @@ const PdfSummary = () => {
             </form>
           </div>
 
+          {/* ── Skeleton Loader ──────────────────────────────────────────────── */}
+          {loading && (
+             <div className="w-full text-left bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-12 border border-primary/20 shadow-sm transition-colors mt-8">
+               <div className="flex items-center gap-3 mb-4">
+                   <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
+                   <p className="text-sm font-bold text-primary dark:text-blue-300">
+                     Analyzing Document{language !== "en" ? ` in ${selectedLang?.label}` : ""}...
+                   </p>
+               </div>
+               <SkeletonLoader lines={6} />
+             </div>
+          )}
+
           {/* ── Summary result ───────────────────────────────────────────────── */}
           {summary && (
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 transition-colors">
@@ -198,24 +213,12 @@ const PdfSummary = () => {
                   </div>
                 </div>
 
-                {/* ✅ FIXED: uses downloadSummaryAsPdf — no html2canvas, no blank pages */}
-                <button
-                  onClick={handleDownloadPDF}
-                  disabled={downloading}
-                  className="flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {downloading ? (
-                    <>
-                      <div className="animate-spin h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full"></div>
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <span className="material-symbols-outlined text-sm">download</span>
-                      Download PDF
-                    </>
-                  )}
-                </button>
+                <SummaryActions 
+                  summary={summary} 
+                  onDownloadPdf={handleDownloadPDF} 
+                  downloadingPdf={downloading} 
+                  title={file ? `Summary: ${file.name.replace(".pdf", "")}` : "PDF Summary"}
+                />
               </div>
 
               {/* Summary body */}

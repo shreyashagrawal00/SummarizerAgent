@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Home from './pages/Home'
@@ -15,6 +16,7 @@ function App() {
   return (
     <Router>
       <div className="antialiased min-h-screen">
+        <Toaster position="top-center" reverseOrder={false} />
         <div className="relative flex min-h-screen w-full flex-col">
           <Header />
           <main className="flex-1">
@@ -36,6 +38,5 @@ function App() {
     </Router>
   )
 }
-
 
 export default App

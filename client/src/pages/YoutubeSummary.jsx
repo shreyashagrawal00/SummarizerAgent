@@ -4,6 +4,8 @@ import { useAuth } from "../context/useAuth";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import ChatBox from "../components/ChatBox";
+import SummaryActions from "../components/SummaryActions";
+import SkeletonLoader from "../components/SkeletonLoader";
 import { downloadSummaryAsPdf } from "../utils/downloadPdf";
 import { INDIAN_LANGUAGES } from "../utils/languages";
 
@@ -171,9 +173,12 @@ export default function YoutubeSummary() {
           </div>
 
           {isLoading && statusMsg && (
-            <div className="w-full max-w-2xl bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800 flex items-center gap-3">
-              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
-              <p className="text-sm font-bold text-blue-700 dark:text-blue-300">{statusMsg}</p>
+            <div className="w-full max-w-2xl text-left bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-12 border border-blue-100 dark:border-slate-800 shadow-sm transition-colors">
+              <div className="flex items-center gap-3 mb-4">
+                  <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
+                  <p className="text-sm font-bold text-blue-700 dark:text-blue-300">{statusMsg}</p>
+              </div>
+              <SkeletonLoader lines={6} />
             </div>
           )}
 
@@ -187,23 +192,18 @@ export default function YoutubeSummary() {
 
         {summary && (
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-500 transition-colors">
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50 transition-colors">
-              <div className="flex items-center gap-3">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between bg-slate-50/50 dark:bg-slate-800/50 transition-colors gap-4">
+              <div className="flex items-center gap-3 w-full sm:w-auto">
                 <span className="material-symbols-outlined text-green-500">check_circle</span>
                 <h2 className="font-display text-xl font-bold text-slate-900 dark:text-white">Summary Generated</h2>
               </div>
-              <button
-                onClick={handleDownloadPDF}
-                disabled={downloading}
-                className="flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50"
-              >
-                {downloading ? (
-                  <div className="animate-spin h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full"></div>
-                ) : (
-                  <span className="material-symbols-outlined text-sm">download</span>
-                )}
-                Download PDF
-              </button>
+              <SummaryActions 
+                summary={summary} 
+                onDownloadPdf={handleDownloadPDF} 
+                downloadingPdf={downloading} 
+                title="YouTube Video Summary"
+                url={url}
+              />
             </div>
             <div className="p-8 sm:p-12">
               <article className="prose prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 text-lg leading-relaxed font-sans">
