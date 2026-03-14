@@ -134,19 +134,21 @@ const SummaryActions = ({ summary, onDownloadPdf, downloadingPdf, title = "Summa
         <span className="hidden sm:inline">Share</span>
       </button>
 
-      <button
-        onClick={onDownloadPdf}
-        disabled={downloadingPdf}
-        className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white px-3 sm:px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        title="Download PDF"
-      >
-        {downloadingPdf ? (
-            <div className="animate-spin h-3.5 w-3.5 sm:h-4 sm:w-4 border-2 border-current border-t-transparent rounded-full"></div>
-        ) : (
-             <span className="material-symbols-outlined text-sm sm:text-base">download</span>
-        )}
-        <span className="hidden sm:inline">Download PDF</span>
-      </button>
+      {onDownloadPdf && (
+        <button
+          onClick={onDownloadPdf}
+          disabled={downloadingPdf}
+          className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white px-3 sm:px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Download PDF"
+        >
+          {downloadingPdf ? (
+              <div className="animate-spin h-3.5 w-3.5 sm:h-4 sm:w-4 border-2 border-current border-t-transparent rounded-full"></div>
+          ) : (
+               <span className="material-symbols-outlined text-sm sm:text-base">download</span>
+          )}
+          <span className="hidden sm:inline">Download PDF</span>
+        </button>
+      )}
     </div>
   );
 };
