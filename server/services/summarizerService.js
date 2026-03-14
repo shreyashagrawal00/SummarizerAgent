@@ -60,10 +60,12 @@ const LANGUAGE_NAMES = {
   es: "Spanish", fr: "French", de: "German", zh: "Chinese", ja: "Japanese",
 };
 
-const langInstruction = (lang) =>
-  lang !== "en"
-    ? `\n\nIMPORTANT: Respond entirely in ${LANGUAGE_NAMES[lang] || "English"}. Do not use English.`
-    : "";
+const langInstruction = (lang) => {
+  if (lang === "en") {
+    return "\n\nIMPORTANT: Respond entirely in English, even if the source text is in another language.";
+  }
+  return `\n\nIMPORTANT: Respond entirely in ${LANGUAGE_NAMES[lang] || "English"}. Do not use English.`;
+};
 
 // ─── AI providers ─────────────────────────────────────────────────────────────
 
