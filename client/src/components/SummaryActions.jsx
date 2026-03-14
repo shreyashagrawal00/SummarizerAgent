@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
-const SummaryActions = ({ summary, onDownloadPdf, downloadingPdf, title = "Summary", url = "" }) => {
+const SummaryActions = ({ summary, onDownloadPdf, downloadingPdf, title = "Summary", url = "", language = "en" }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [speechSynthesis, setSpeechSynthesis] = useState(null);
   const [speechUtterance, setSpeechUtterance] = useState(null);
@@ -75,9 +75,27 @@ const SummaryActions = ({ summary, onDownloadPdf, downloadingPdf, title = "Summa
     
     // Attempt to pick a good voice
     const voices = speechSynthesis.getVoices();
-    // Try to find a nice English voice
-    const preferredVoice = voices.find(v => v.lang.includes("en-US") && v.name.includes("Google")) || voices[0];
-    if (preferredVoice) utterance.voice = preferredVoice;
+    
+    const langToLocale = {
+      en: "en-", hi: "hi-IN", bn: "bn-IN", te: "te-IN", mr: "mr-IN", 
+      ta: "ta-IN", gu: "gu-IN", kn: "kn-IN", ml: "ml-IN", pa: "pa-IN", 
+      or: "or-IN", as: "as-IN", ur: "ur-IN"
+    };
+    const targetLoc = langToLocale[language] || "en-US";
+
+    // Try to find a matching voice for the language
+    let preferredVoice = voices.find(v => v.lang.includes(targetLoc) && v.name.includes("Google"));
+    if (!preferredVoice) preferredVoice = voices.find(v => v.lang.includes(targetLoc));
+    
+    // Fallback to English if the specific language voice isn't found
+    if (!preferredVoice) preferredVoice = voices.find(v => v.lang.includes("en-US") && v.name.includes("Google")) || voices[0];
+
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+      utterance.lang = preferredVoice.lang;
+    } else {
+      utterance.lang = targetLoc === "en-" ? "en-US" : targetLoc;
+    }
 
     utterance.rate = 1.0; 
     utterance.pitch = 1.0;

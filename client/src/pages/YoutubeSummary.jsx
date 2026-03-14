@@ -203,6 +203,7 @@ export default function YoutubeSummary() {
                 downloadingPdf={downloading} 
                 title="YouTube Video Summary"
                 url={url}
+                language={language}
               />
             </div>
             <div className="p-8 sm:p-12">

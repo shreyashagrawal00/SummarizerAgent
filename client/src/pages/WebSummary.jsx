@@ -168,6 +168,7 @@ export default function WebSummary() {
                 downloadingPdf={downloading} 
                 title="Webpage Summary"
                 url={url}
+                language={language}
               />
             </div>
             <div className="p-8 sm:p-12">

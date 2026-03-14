@@ -286,7 +286,8 @@ export default function NewsFeed() {
               <div className="w-full sm:w-auto">
                 <SummaryActions 
                   summary={activeSummary?.content} 
-                  title={activeSummary?.title} 
+                  title={activeSummary?.title}
+                  language={activeSummary?.language || "en"}
                 />
               </div>
               <button

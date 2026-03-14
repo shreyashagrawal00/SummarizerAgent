@@ -218,6 +218,7 @@ const PdfSummary = () => {
                   onDownloadPdf={handleDownloadPDF} 
                   downloadingPdf={downloading} 
                   title={file ? `Summary: ${file.name.replace(".pdf", "")}` : "PDF Summary"}
+                  language={language}
                 />
               </div>
 
