@@ -3,6 +3,7 @@ import API from "../api/api";
 import { useAuth } from "../context/useAuth";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
+import SummaryActions from "../components/SummaryActions";
 
 const INDIAN_LANGUAGES = [
   { code: "en", label: "English" },
@@ -281,10 +282,16 @@ export default function NewsFeed() {
                 </article>
               )}
             </div>
-            <div className="p-6 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-800 flex justify-end transition-colors">
+            <div className="p-6 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center sm:items-end gap-4 transition-colors">
+              <div className="w-full sm:w-auto">
+                <SummaryActions 
+                  summary={activeSummary?.content} 
+                  title={activeSummary?.title} 
+                />
+              </div>
               <button
                 onClick={() => { setActiveSummary(null); setError(null); }}
-                className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold px-8 py-3 rounded-xl hover:brightness-110 transition-all shadow-md active:scale-95"
+                className="w-full sm:w-auto bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold px-8 py-3 rounded-xl hover:brightness-110 transition-all shadow-md active:scale-95"
               >
                 Got it
               </button>
