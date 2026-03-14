@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import SummaryActions from "../components/SummaryActions";
 import { downloadSummaryAsPdf } from "../utils/downloadPdf";
+import { INDIAN_LANGUAGES } from "../utils/languages";
 
 export default function Dashboard() {
   const [summary, setSummary] = useState("");
@@ -12,6 +13,7 @@ export default function Dashboard() {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const [downloading, setDownloading] = useState(false);
+  const [language, setLanguage] = useState("en");
 
   const handleDownloadPDF = () => {
     if (!summary || summary === "AI_QUOTA_ERROR") return;
@@ -35,7 +37,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (isAuthenticated) {
       setIsLoading(true);
-      API.get("/news/summary")
+      API.get(`/news/summary?language=${language}`)
         .then((res) => setSummary(res.data.summary))
         .catch((err) => {
           console.error("Failed to fetch summary", err);
@@ -47,7 +49,7 @@ export default function Dashboard() {
     } else {
       navigate("/login");
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, language]);
 
   if (!isAuthenticated) return null;
 
@@ -138,16 +140,33 @@ export default function Dashboard() {
                     })}
                   </p>
                 </div>
-                {!isLoading && summary && summary !== "AI_QUOTA_ERROR" && (
-                  <div className="shrink-0">
-                    <SummaryActions 
-                      summary={summary} 
-                      onDownloadPdf={handleDownloadPDF} 
-                      downloadingPdf={downloading} 
-                      title="Morning Brief" 
-                    />
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-slate-400">translate</span>
+                    <select
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value)}
+                      className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2 outline-none font-bold transition-colors"
+                    >
+                      {INDIAN_LANGUAGES.map((lang) => (
+                        <option key={lang.code} value={lang.code}>
+                          {lang.label} {lang.code === "en" ? "(default)" : ""}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                )}
+                  {!isLoading && summary && summary !== "AI_QUOTA_ERROR" && (
+                    <div className="shrink-0">
+                      <SummaryActions 
+                        summary={summary} 
+                        onDownloadPdf={handleDownloadPDF} 
+                        downloadingPdf={downloading} 
+                        title="Morning Brief" 
+                        language={language}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Body */}

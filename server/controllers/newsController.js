@@ -19,7 +19,7 @@ const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
 export const getNewsSummary = async (req, res) => {
   try {
-    const { category } = req.query;
+    const { category, language } = req.query;
     const data = await fetchNews(null, category || "top");
     const articles = deduplicateArticles(data.results);
 
@@ -27,7 +27,7 @@ export const getNewsSummary = async (req, res) => {
       return res.json({ totalArticles: 0, summary: "No news found currently." });
     }
 
-    const summary = await summarizeNews(articles);
+    const summary = await summarizeNews(articles, language || "en");
     res.json({ totalArticles: articles.length, summary });
   } catch (error) {
     console.error("News summary error:", error);
