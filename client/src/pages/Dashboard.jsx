@@ -127,7 +127,7 @@ export default function Dashboard() {
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden min-h-[600px] flex flex-col transition-colors">
 
               {/* Card header */}
-              <div className="border-b border-slate-100 dark:border-slate-800 p-6 md:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/50 transition-colors">
+              <div className="border-b border-slate-100 dark:border-slate-800 p-6 md:p-8 flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/50 transition-colors">
                 <div>
                   <h1 className="font-display text-2xl md:text-3xl font-bold text-slate-900 dark:text-white leading-tight transition-colors">
                     Today's Morning Brief
@@ -138,6 +138,16 @@ export default function Dashboard() {
                     })}
                   </p>
                 </div>
+                {!isLoading && summary && summary !== "AI_QUOTA_ERROR" && (
+                  <div className="shrink-0">
+                    <SummaryActions 
+                      summary={summary} 
+                      onDownloadPdf={handleDownloadPDF} 
+                      downloadingPdf={downloading} 
+                      title="Morning Brief" 
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Body */}
